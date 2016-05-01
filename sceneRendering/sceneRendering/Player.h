@@ -82,7 +82,7 @@ typedef struct HumanBody{
     GLint faces;		// polygon resolution
     GLUquadricObj *obj;	// quadric object init
     
-} Human;
+} HumanBody;
 
 
 enum movementType
@@ -109,7 +109,7 @@ typedef struct
     uint32_t currentTime; //MS
 } HumanMovement;
 
-void drawPlayer(Human human,HumanMovement movement);
+void drawPlayer(HumanBody human,HumanMovement movement);
 
 HumanBody HumanInit(double height);
 void CheckRestrictions(HumanBody H);
