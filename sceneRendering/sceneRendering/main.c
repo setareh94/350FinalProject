@@ -1,24 +1,17 @@
 /*
  *  Setareh Lotfi
- *  Assignment 5
- *  3/16/2016
+ *  Katie Fotion
+ *  Hayden Clevenger
+ *  4/3/2016
  *
- *  This assignment is the practice of walking in the scene using glulookAt and
- *  projection prespective.
+ *  This assignment is the culmination of everything we learned this semester
  *
- *  Usage:
- *  Using UP/DOWN/LEFT/RIGHT arrow on keyboard to walk in scene
- *  '+' : Zoom in the scene
- *  '-' : Zoom out of the scene
- *  'w' : goes up
- *  's' : move down
- *  My program draws one type of house that uses loop to create more houses
- *  I used 5 different types of tree being drawn through out my program
- *  Using filed of view for perspective angles can be increment or decrement
- *  to show more of the scene.
- *  Using arrow keys user can walk through the scene and explore the shapes.
+ *  Usage:      //FILL IN USAGE//
+ *
+ *  Overview:   //FILL IN OVERVIEW//
  *
  */
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -27,24 +20,17 @@
 #include <math.h>
 #include "Player.h"
 
+float step = 0.25;   //for moving camera
 
 float m=0.0;    //movement of clouds
 
-float w = 600, h = 800; // Width and Heghit of the window
+float w = 800, h = 600; // Width and Height of the window
 
-float dx=0.0f, dy = 1.0f, dz=-1.0f; // actual vector representing the camera's direction
-
-float x=-1.5f,z=14.0f, y = 1.0f; // XYZ position of the camera
-
-float red=1.0f, blue=1.0f, green=1.0f; //Initaliae the variable for color array
-
-float zoom = 0.01; // incremetation base for zoom level
+//for gluLookAt function
+float eye[3] = {1.5f, 1.0f, 14.0f}; //eye vector
+float at[3] = {0.0f, 1.0f, -1.0f};  //at vector
 
 float angle = 0.0f; // angle for rotating triangle
-
-int fov=1;       //  Field of view (for perspective)
-
-float upX = 0.0, upY = 1.0, upZ = 0.0;
 
 //double eyeIdealPosition[3] = {-10, 10, -10};
 double eyePosition[3];
@@ -55,7 +41,7 @@ HumanMovement humanMovement;
 
 enum View
 {
-    eye,
+    //eye,
     projection,
     orthoginal
 };
@@ -132,10 +118,9 @@ void init(void)
     
     // Set the viewport to be the entire window
     glViewport(0, 0, w, h);
-    float ratio = w * 1.0 / h;
     
     // Set the correct perspective.
-    gluPerspective(45.0f-fov, ratio, 0.1f, 100.0f);
+    gluPerspective(60.0, w/h, 1.0, 100.0);
     
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
@@ -420,7 +405,7 @@ void house()
     
 }
 
-/* Idel function for cloud animations */
+/* Idele function for cloud animations */
 void idle()
 {
     m +=0.005;
@@ -435,9 +420,7 @@ void display(){
     glLoadIdentity();
     // Set the camera
     
-    gluLookAt(	x, y, z,
-              x+dx, y,  z+dz,
-              0.0f, 1.0f,  0.0f);
+    gluLookAt(eye[0], eye[1], eye[2], at[0], at[1], at[2], 0, 1, 0);
     
     glColor3f(1.0, 1.0, 1.0);
     
@@ -445,7 +428,7 @@ void display(){
     ground();
     cloud();
     sun();
-    drawPlayer(human, humanMovement);
+   // drawPlayer(human, humanMovement);
 
     
     // Draw 9 houses on the screen
@@ -459,14 +442,10 @@ void display(){
     
     //Draw Different Trees
     tree(-3.0,-0.2f,8.0 ,0.8,0.5,0.8, 30, 1.9f,0.2f,2.0f,1.0f, 1);
-    
     tree(6,0,1.5 ,0.5,0.5,0.5, 0, 1.0f,0.3f,4.0f,1.0f, 2);
-    
     tree(-1.0f, 0,6.0f ,0.6,0.6,0.6, 0, 0.7f,0.3f,1.5f,1.0f, 3);
     tree(2.1f, 0, 6.5f ,0.5,0.5,0.5, 0.2, 1.0f,0.3f,2.0f,1.0f, 1);
     tree(2.1f,0,-1.0f ,0.5,0.5,0.5, 0.2, 1.0f,0.3f,2.0f,1.0f, 1);
-    
-    
     for(int i = -2; i < 1; i++)
         for(int j=-2; j < 1; j++) {
             glPushMatrix();
@@ -478,63 +457,97 @@ void display(){
     
 }
 
-/* Change the camera position */
+/* 
+ Mouse function
+ */
 void mouse(int btn, int state, int x, int y)
 {
     
-    if(btn==GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-        angle += 0.01f;
-    dx = sin(angle);
-    if(btn==GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-        angle += 0.01f;
-    dz = -cos(angle);
+    //do something with mouse - possibly throw balls
     
     glutPostRedisplay();
 }
 
-/* Use + and - keys to change the field of view of the perspective position */
+/* 
+ Keyboard function
+ w : move forward
+ s : move backward
+ a : strafe left
+ d : strafe right
+ */
 void keyboard(unsigned char key, int x, int z)
-{   float fraction = 0.1f;
-    if ((key == 'w') || (key == 'W'))
-        y+= fraction;
-    if ((key == 's') || (key == 'S'))
-        y-= fraction;
-    if (key == '-' && key>1)
-        fov--;
-    if (key == '+' && key<179)
-        fov++;
+{
+    if((key == 'w') || (key == 'W')) {
+        eye[2] -= step;
+        at[2] -= step;
+    }
+    
+    if((key == 's') || (key == 'S')) {
+        eye[2] += step;
+        at[2] += step;
+    }
+    
+    if((key == 'a') || (key == 'A')) {
+        eye[0] -= step;
+        at[0] -= step;
+    }
+    
+    if((key == 'd') || (key == 'D')) {
+        eye[0] += step;
+        at[0] += step;
+    }
+    
+    if(key == 27) {
+        exit(0);
+    }
+    
     init();
     glutPostRedisplay();
 }
 
-/* Use arrow keys to translate the eye position */
-
+/* 
+ Arrow Key Function
+ Controls the at[] vector and direct where the user looks
+ */
 void special(int key,int x,int y)
 {
-    float fraction = 0.1f;
-    
     switch (key) {
         case GLUT_KEY_LEFT :
-            angle -= 0.01f;
-            dx = sin(angle);
-            dz = -cos(angle);
+            //add functionality
             break;
         case GLUT_KEY_RIGHT :
-            angle += 0.01f;
-            dx = sin(angle);
-            dz = -cos(angle);
+            //add functinality
             break;
         case GLUT_KEY_UP :
-            x += dx * fraction;
-            z += dz * fraction;
+            //add functionality
             break;
         case GLUT_KEY_DOWN :
-            x -= dx * fraction;
-            z -= dz * fraction;
+            //add functionality
             break;
     }
 }
 
+/*
+ Reshape function
+ */
+void reshape(int width, int height) {
+    //update width and height values
+    w = width;
+    h = height;
+    //Set the viewport
+    glViewport(0, 0, w, h);
+    
+    //Set the matrix mode to projection
+    glMatrixMode(GL_PROJECTION);
+    
+    //Load the identity matrix
+    glLoadIdentity();
+    
+    gluPerspective(60.0, w/h, 1.0, 100.0);
+    
+    //Set the matrix mode to model view
+    glMatrixMode(GL_MODELVIEW);
+}
 
 int main(int argc, char *argv[])
 {
@@ -543,7 +556,7 @@ int main(int argc, char *argv[])
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(w, h);
     glutInitWindowPosition(0, 0);
-    glutCreateWindow("Little Town Assignment 5");
+    glutCreateWindow("Final Project");
     
     init();
     glutDisplayFunc(display);
@@ -552,6 +565,7 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(special);
     glutIdleFunc(idle);
+    glutReshapeFunc(reshape);
     glEnable(GL_DEPTH_TEST);
     
     
