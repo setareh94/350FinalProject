@@ -18,6 +18,7 @@
 #include <GL/glut.h>
 #endif
 #include <math.h>
+#include <time.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +40,9 @@ float w = 800, h = 600; // Width and Height of the window
 //for gluLookAt function
 float eye[3] = {1.5f, 1.0f, 14.0f}; //eye vector
 float at[3] = {0.0f, 1.0f, -1.0f};  //at vector
+
+// Ball posiiton
+float ballPos[3]={-10.0f, -10.0f, -10.0f};
 
 float angle = 0.0f; // angle for rotating triangle
 
@@ -179,8 +183,6 @@ void init(void)
 /* Create the scene particals
  * Trees, house, clouds, ground, and sun
  */
-
-
 /* Creates 4 different types of trees */
 static void tree(double x,double y,double z,
                  double dx,double dy,double dz,
@@ -344,8 +346,6 @@ void cloud(){
     glutSolidSphere(0.4,20,20);
     glPopMatrix();
     glFlush();
-    
-    
 }
 
 
@@ -408,7 +408,6 @@ void house()
     glutSolidCube(0.5);
     glPopMatrix();
     
-    
     glColor3fv(colors[3]); //tree trunk 1
     glPushMatrix();
     glTranslatef(-1.0,0.35,-1.3);
@@ -450,8 +449,6 @@ void house()
     glScalef(0.5,0.5,0.5);
     glutSolidSphere(0.5,20,20);
     glPopMatrix();
-    
-    
 }
 
 /* Idle function for cloud animations */
@@ -489,7 +486,12 @@ void display(){
     cloud();
     sun();
     //drawPlayer(human, humanMovement);
-
+    
+    // Draw the ball if necessary
+    if(!ballPos[0]) {
+        glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
+        glutSolidTorus(0.1, 0.5, 100, 100);
+    }
     
     // Draw 9 houses on the screen
     for(int i = -1; i < 2; i++)
@@ -528,10 +530,16 @@ void display(){
  */
 void mouse(int btn, int state, int x, int y)
 {
-    
-    //do something with mouse - possibly throw balls
-    
-    glutPostRedisplay();
+    if(btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        ballPos[0] = eye[0];
+        ballPos[1] = eye[1];
+        ballPos[2] = eye[2];
+        for(int i = 0; i < 100000; i++) {
+            ballPos[0] += (4.0*cos(PI/4.0))*clock();
+            ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
+            glutPostRedisplay();
+        }
+    }
 }
 
 /* 
