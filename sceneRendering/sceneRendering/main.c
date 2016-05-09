@@ -171,7 +171,7 @@ void init(void)
     glViewport(0, 0, w, h);
     
     // Set the correct perspective.
-    gluPerspective(60.0, w/h, 1.0, 100.0);
+    gluPerspective(60.0, w/h, 0.1, 100.0);
     
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
@@ -460,10 +460,9 @@ void idle()
     if(ball_timer < 100000) {
         
         //move ball position by one step
-        
         // MATH NOT FINALIZED //
-        ballPos[0] += (4.0*cos(PI/4.0))*clock();
-        ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
+  //      ballPos[0] += (4.0*cos(PI/4.0))*clock();
+   //     ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
         
         //increment so movement eventually stops
         ball_timer++;
@@ -501,8 +500,11 @@ void display(){
     
     // Draw the ball if necessary
     if(ball_timer < 100000) {
+        glPushMatrix();
         glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
-        glutSolidSphere(1, 10, 10);
+        glColor3f(1.0, 1.0, 1.0);
+        glutSolidSphere(0.05, 50, 50);
+        glPopMatrix();
     }
     
     // Draw 9 houses on the screen
@@ -652,7 +654,7 @@ void reshape(int width, int height) {
     //Load the identity matrix
     glLoadIdentity();
     
-    gluPerspective(60.0, w/h, 1.0, 100.0);
+    gluPerspective(60.0, w/h, 0.1, 100.0);
     
     //Set the matrix mode to model view
     glMatrixMode(GL_MODELVIEW);
