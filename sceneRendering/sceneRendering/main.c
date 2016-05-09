@@ -41,8 +41,10 @@ float w = 800, h = 600; // Width and Height of the window
 float eye[3] = {1.5f, 1.0f, 14.0f}; //eye vector
 float at[3] = {0.0f, 1.0f, -1.0f};  //at vector
 
-// Ball posiiton
+//ball posiiton
 float ballPos[3]={-10.0f, -10.0f, -10.0f};
+//ball movmement counter (see idle)
+int ball_timer = 100001;
 
 float angle = 0.0f; // angle for rotating triangle
 
@@ -451,13 +453,31 @@ void house()
     glPopMatrix();
 }
 
-/* Idle function for cloud animations */
+/* Idle function for animations */
 void idle()
 {
-    if(m < 30)
+    //ball things
+    if(ball_timer < 100000) {
+        
+        //move ball position by one step
+        
+        // MATH NOT FINALIZED //
+        ballPos[0] += (4.0*cos(PI/4.0))*clock();
+        ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
+        
+        //increment so movement eventually stops
+        ball_timer++;
+    }
+    
+    //cloud things
+    if(m < 30) {
         m +=0.005;
-    else
+    }
+    else {
         m = -30;
+    }
+    
+    //redraw
     glutPostRedisplay();
     
 }
@@ -467,14 +487,6 @@ void display(){
     glClearColor(0.6,0.6,1.0,1.0);
     // Reset transformations
     glLoadIdentity();
-    
-    if(!extremes) {
-        // Recalculate at values
-        at[0] = eye[0] + cos(theta);
-        at[1] = eye[1] + sin(theta)*sin(phi);
-        at[2] = eye[2] + cos(phi)*sin(theta);
-    }
-    extremes = false;
     
     // Set the camera
     gluLookAt(eye[0], eye[1], eye[2], at[0], at[1], at[2], 0, 1, 0);
@@ -488,9 +500,9 @@ void display(){
     //drawPlayer(human, humanMovement);
     
     // Draw the ball if necessary
-    if(!ballPos[0]) {
+    if(ball_timer < 100000) {
         glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
-        glutSolidTorus(0.1, 0.5, 100, 100);
+        glutSolidSphere(1, 10, 10);
     }
     
     // Draw 9 houses on the screen
@@ -531,14 +543,10 @@ void display(){
 void mouse(int btn, int state, int x, int y)
 {
     if(btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        ball_timer = 0;
         ballPos[0] = eye[0];
         ballPos[1] = eye[1];
         ballPos[2] = eye[2];
-        for(int i = 0; i < 100000; i++) {
-            ballPos[0] += (4.0*cos(PI/4.0))*clock();
-            ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
-            glutPostRedisplay();
-        }
     }
 }
 
@@ -582,17 +590,17 @@ void keyboard(unsigned char key, int x, int z)
         eye[2] += step*cos(-theta);
         at[2] += step*cos(-theta);
     }
-    
-    else if(key == 27) {
-        exit(0);
-    }
-    
-    else if (key == 32) {
+
+    else if(key == 32) {
         if(scooter)
             walkSpeed = 0.1f;
         else
             walkSpeed = 0.5f;
         scooter = !scooter;
+    }
+    
+    else if(key == 27) {
+        exit(0);
     }
     
     init();
@@ -601,9 +609,9 @@ void keyboard(unsigned char key, int x, int z)
 
 /* 
  Arrow Key Function
- Controls the at[] vector and direct where the user looks
+ Controls the at[] vector and directs where the user looks
  */
-void special(int key,int x,int y)
+void special(int key, int x, int y)
 {
     switch (key) {
         case GLUT_KEY_LEFT :
@@ -615,16 +623,17 @@ void special(int key,int x,int y)
         case GLUT_KEY_UP :
             if(phi - (step/2.0) > -PI/4.0)
                 phi -= step/2.0;
-            else
-                extremes = true;
             break;
         case GLUT_KEY_DOWN :
             if(phi + (step/2.0) < PI/4.0)
                 phi += step/2.0;
-            else
-                extremes = true;
             break;
     }
+    
+    // Recalculate at values
+    at[0] = eye[0] + cos(theta);
+    at[1] = eye[1] + -sin(phi);
+    at[2] = eye[2] + cos(phi)*sin(theta);
 }
 
 /*
