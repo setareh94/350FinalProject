@@ -18,9 +18,19 @@
 #include <GL/glut.h>
 #endif
 #include <math.h>
-#include "Player.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-float step = 0.25;   //for moving camera
+#include "Player.h"
+#include "Scooter.h"
+
+#define ourImageWidth 256
+#define ourImageHeight 256
+#define PI 3.1415
+
+float phi=0.0, theta=0.0, step = 0.25;   //for moving camera
 
 float m=0.0;    //movement of clouds
 
@@ -36,8 +46,16 @@ float angle = 0.0f; // angle for rotating triangle
 double eyePosition[3];
 double eyeFocus[3];
 
+float walkSpeed = 0.1f; // Speed of walking (gets faster on scooter)
+
+bool scooter = false, extremes = false;
+
 HumanBody human;
 HumanMovement humanMovement;
+
+static GLubyte ourImage[ourImageHeight][ourImageWidth][4];
+unsigned int texture;
+char filename[200];
 
 enum View
 {
@@ -106,7 +124,35 @@ GLfloat vertic[][3]={{-1.5,0.0,1.5},{-1.5,0.0,-1.5},{1.5,0.0,-1.5},{1.5,0.0,1.5}
 GLfloat colors[][3]={{1.0,1.0,1.0},{0.0,0.0,0.0},{0.89019,0.38823,0.03921},{0.57254,0.44705,0.01176},{0.88235,0.0,0.03921},{0.00784,0.54509,0.0},
     {0.4588,0.6784,0.2509},{0.88235,0.67843,0.2},{0.35294117,0.3568627,0.3647059},{0.0,0.0,1.0}}; //0.white,1.black,2.orange,3.yellowish,4.red,5.green,6.car,7.orange,8.grey
 
-
+// Read texture image file
+unsigned int LoadTex(char *s)
+{
+    unsigned int Texture;
+    FILE* img;
+    img = fopen(s,"rb");
+    unsigned long bWidth = 0;
+    unsigned long bHeight = 0;
+    unsigned long size = 0;
+    
+    fseek(img,18,SEEK_SET);
+    fread(&bWidth,4,1,img);
+    fread(&bHeight,4,1,img);
+    fseek(img,0,SEEK_END);
+    size = ftell(img) - 54;
+    unsigned char *data = (unsigned char*)malloc(size);
+    fseek(img,54,SEEK_SET);
+    fread(data,size,1,img);
+    fclose(img);
+    glGenTextures(1, &Texture);
+    glBindTexture(GL_TEXTURE_2D, Texture);
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, bWidth, bHeight, GL_BGR_EXT, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    
+    if (data)
+        free(data);
+    return Texture;
+}
 
 /* Initate the matrix mode and viewPort for the window */
 void init(void)
@@ -124,6 +170,11 @@ void init(void)
     
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
+    
+    // Allow for texturing
+    glShadeModel(GL_FLAT);
+    glEnable(GL_DEPTH_TEST);
+    texture = LoadTex(filename);
 }
 
 /* Create the scene particals
@@ -225,27 +276,27 @@ void sun(){
     glFlush();
 }
 
-//make the ground
-void ground()
+// Texture the ground
+void texGround()
 {
-    int i, j;
-    glLineWidth(1);
-    for (i = 0; i < 20; i++)
-    {
-        glBegin(GL_LINES);
-        glVertex3f(-10.0 + i, -1.0, 10.0);
-        glVertex3f(-10.0 + i, -1.0, -10.0);
-        glEnd();
+    // Enable for texturing
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) {
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0, 0.0); glVertex3f(-20.0+(i*10.0), 0.0, -20.0+(j*10.0));
+            glTexCoord2f(1.0, 0.0); glVertex3f(-10.0+(i*10.0), 0.0, -20.0+(j*10.0));
+            glTexCoord2f(1.0, 1.0); glVertex3f(-10.0+(i*10.0), 0.0, -10.0+(j*10.0));
+            glTexCoord2f(0.0, 1.0); glVertex3f(-20.0+(i*10.0), 0.0, -10.0+(j*10.0));
+            glEnd();
+        }
     }
-    for (j = 0; j < 20; j++)
-    {
-        glBegin(GL_LINES);
-        glVertex3f(-10.0, -1.0, 10.0 - j);
-        glVertex3f(10.0, -1.0, 10.0 - j);
-        glEnd();
-    }
+    
+    // Disable texturing
+    glDisable(GL_TEXTURE_2D);
 }
-
 
 void cloud(){
     
@@ -317,10 +368,9 @@ void triangle(int a,int b,int c)
     glVertex3fv(vertic[c]);
     glEnd();
 }
+
 void house()
 {
-    
-    
     glColor3fv(colors[2]);  //house base
     squars(4,5,6,7);
     glColor3fv(colors[2]);  //house left wall
@@ -405,10 +455,13 @@ void house()
     
 }
 
-/* Idele function for cloud animations */
+/* Idle function for cloud animations */
 void idle()
 {
-    m +=0.005;
+    if(m < 30)
+        m +=0.005;
+    else
+        m = -30;
     glutPostRedisplay();
     
 }
@@ -418,17 +471,25 @@ void display(){
     glClearColor(0.6,0.6,1.0,1.0);
     // Reset transformations
     glLoadIdentity();
-    // Set the camera
     
+    if(!extremes) {
+        // Recalculate at values
+        at[0] = eye[0] + cos(theta);
+        at[1] = eye[1] + sin(theta)*sin(phi);
+        at[2] = eye[2] + cos(phi)*sin(theta);
+    }
+    extremes = false;
+    
+    // Set the camera
     gluLookAt(eye[0], eye[1], eye[2], at[0], at[1], at[2], 0, 1, 0);
     
     glColor3f(1.0, 1.0, 1.0);
     
     //Draw the scene
-    ground();
+    texGround();
     cloud();
     sun();
-   // drawPlayer(human, humanMovement);
+    //drawPlayer(human, humanMovement);
 
     
     // Draw 9 houses on the screen
@@ -441,7 +502,7 @@ void display(){
         }
     
     //Draw Different Trees
-    tree(-3.0,-0.2f,8.0 ,0.8,0.5,0.8, 30, 1.9f,0.2f,2.0f,1.0f, 1);
+    tree(-3.0,0.05f,8.0 ,0.8,0.5,0.8, 30, 1.9f,0.2f,2.0f,1.0f, 1);
     tree(6,0,1.5 ,0.5,0.5,0.5, 0, 1.0f,0.3f,4.0f,1.0f, 2);
     tree(-1.0f, 0,6.0f ,0.6,0.6,0.6, 0, 0.7f,0.3f,1.5f,1.0f, 3);
     tree(2.1f, 0, 6.5f ,0.5,0.5,0.5, 0.2, 1.0f,0.3f,2.0f,1.0f, 1);
@@ -453,6 +514,12 @@ void display(){
             tree(-2.5f,0,-2.0f ,0.5,0.5,0.5, 0, 0.3f,0.3f,3.0f,1.0f,4);
             glPopMatrix();
         }
+    
+    glPushMatrix();
+    if(scooter)
+        drawScooter(eye[0], eye[1], eye[2]);
+    glPopMatrix();
+    
     glutSwapBuffers();
     
 }
@@ -501,6 +568,14 @@ void keyboard(unsigned char key, int x, int z)
         exit(0);
     }
     
+    if (key == 32) {
+        if(scooter)
+            walkSpeed = 0.1f;
+        else
+            walkSpeed = 0.5f;
+        scooter = !scooter;
+    }
+    
     init();
     glutPostRedisplay();
 }
@@ -513,16 +588,22 @@ void special(int key,int x,int y)
 {
     switch (key) {
         case GLUT_KEY_LEFT :
-            //add functionality
+            theta -= step/2.0;
             break;
         case GLUT_KEY_RIGHT :
-            //add functinality
+            theta += step/2.0;
             break;
         case GLUT_KEY_UP :
-            //add functionality
+            if(phi - (step/2.0) > -PI/4.0)
+                phi -= step/2.0;
+            else
+                extremes = true;
             break;
         case GLUT_KEY_DOWN :
-            //add functionality
+            if(phi + (step/2.0) < PI/4.0)
+                phi += step/2.0;
+            else
+                extremes = true;
             break;
     }
 }
@@ -551,6 +632,14 @@ void reshape(int width, int height) {
 
 int main(int argc, char *argv[])
 {
+    if(argc != 2) {
+        printf("\nThe program should be called as follows:\n\n");
+        printf("sceneRendering grassFileName\nPlease try again.\n\n");
+        exit(1);
+    }
+    
+    strcpy(filename, argv[1]);
+    
     // Initialize the program
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
