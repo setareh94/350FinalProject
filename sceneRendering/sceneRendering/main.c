@@ -30,7 +30,7 @@
 #define ourImageHeight 256
 #define PI 3.1415
 
-float phi=0.0, theta=0.0, step = 0.25;   //for moving camera
+float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
 
 float m=0.0;    //movement of clouds
 
@@ -53,7 +53,6 @@ bool scooter = false, extremes = false;
 HumanBody human;
 HumanMovement humanMovement;
 
-static GLubyte ourImage[ourImageHeight][ourImageWidth][4];
 unsigned int texture;
 char filename[200];
 
@@ -545,30 +544,42 @@ void mouse(int btn, int state, int x, int y)
 void keyboard(unsigned char key, int x, int z)
 {
     if((key == 'w') || (key == 'W')) {
-        eye[2] -= step;
-        at[2] -= step;
+        
+        eye[0] -= step*sin(-theta - (PI/2.0));
+        at[0] -= step*sin(-theta - (PI/2.0));
+        eye[2] -= step*cos(-theta - (PI/2.0));
+        at[2] -= step*cos(-theta - (PI/2.0));
     }
     
-    if((key == 's') || (key == 'S')) {
-        eye[2] += step;
-        at[2] += step;
+    else if((key == 's') || (key == 'S')) {
+        
+        eye[0] += step*sin(-theta - (PI/2.0));
+        at[0] += step*sin(-theta - (PI/2.0));
+        eye[2] += step*cos(-theta - (PI/2.0));
+        at[2] += step*cos(-theta - (PI/2.0));
     }
     
-    if((key == 'a') || (key == 'A')) {
-        eye[0] -= step;
-        at[0] -= step;
+    else if((key == 'a') || (key == 'A')) {
+        
+        eye[0] -= step*sin(-theta);
+        at[0] -= step*sin(-theta);
+        eye[2] -= step*cos(-theta);
+        at[2] -= step*cos(-theta);
     }
     
-    if((key == 'd') || (key == 'D')) {
-        eye[0] += step;
-        at[0] += step;
+    else if((key == 'd') || (key == 'D')) {
+        
+        eye[0] += step*sin(-theta);
+        at[0] += step*sin(-theta);
+        eye[2] += step*cos(-theta);
+        at[2] += step*cos(-theta);
     }
     
-    if(key == 27) {
+    else if(key == 27) {
         exit(0);
     }
     
-    if (key == 32) {
+    else if (key == 32) {
         if(scooter)
             walkSpeed = 0.1f;
         else
