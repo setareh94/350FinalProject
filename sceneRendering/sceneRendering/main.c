@@ -675,6 +675,7 @@ void display(){
     cloud();
     sun();
     displayPlayerViewport();
+    displayBike();
     
     // Draw the ball if necessary
     if(ball_timer < 100000 && ballPos[1] > 0.0) {
@@ -708,10 +709,10 @@ void display(){
             glPopMatrix();
         }
     
-    glPushMatrix();
-    if(scooter)
-        drawScooter(eye[0], eye[1], eye[2]);
-    glPopMatrix();
+//    glPushMatrix();
+//    if(scooter)
+//        drawScooter(eye[0], eye[1], eye[2]);
+//    glPopMatrix();
     
     glutSwapBuffers();
     

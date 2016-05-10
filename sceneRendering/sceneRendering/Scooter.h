@@ -10,5 +10,7 @@
 #define Scooter_h
 
 #include <stdio.h>
+void displayBike();
+
 
 #endif /* Scooter_h */
