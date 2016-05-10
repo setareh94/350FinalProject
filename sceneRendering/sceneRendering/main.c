@@ -45,6 +45,7 @@ float at[3] = {0.0f, 1.0f, -1.0f};  //at vector
 float ballPos[3]={-10.0f, -10.0f, -10.0f};
 //ball movmement counter (see idle)
 int ball_timer = 100001;
+float ball_speed = 0.005;
 
 float angle = 0.0f; // angle for rotating triangle
 
@@ -460,9 +461,14 @@ void idle()
     if(ball_timer < 100000) {
         
         //move ball position by one step
-        // MATH NOT FINALIZED //
-  //      ballPos[0] += (4.0*cos(PI/4.0))*clock();
-   //     ballPos[1] += (4.0*sin(PI/4.0))*clock() - (9.8*(clock()^2)/2.0);
+
+        // Katie's math
+//        ballPos[0] += (4.0*cos(PI/4.0))*ball_timer;
+//        ballPos[1] += (4.0*sin(PI/4.0))*ball_timer - (.00098*(ball_timer^2)/2.0);
+        
+        //Hayden's math
+        ballPos[2] -= ball_speed;
+        ballPos[1] += (ball_speed * ball_timer) + ((-.00032 * ball_timer * ball_timer) / 2);
         
         //increment so movement eventually stops
         ball_timer++;
