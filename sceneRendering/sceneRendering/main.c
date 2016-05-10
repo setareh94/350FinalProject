@@ -33,6 +33,12 @@
 
 float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
 
+// Variables for throwing the balls
+float rotation=3*PI/2.0;
+float prev_xz = 0.0;
+float y_start, v0, degree;
+int bounce_count = 0;
+
 float m=0.0;    //movement of clouds
 
 float w = 800, h = 600; // Width and Height of the window
@@ -55,7 +61,7 @@ double eyeFocus[3];
 
 float walkSpeed = 0.1f; // Speed of walking (gets faster on scooter)
 
-bool scooter = false, extremes = false;
+bool scooter = false, extremes = false, hit=false;
 
 HumanBody human;
 HumanMovement humanMovement;
@@ -458,19 +464,38 @@ void house()
 void idle()
 {
     //ball things
-    if(ball_timer < 100000) {
+    if(ball_timer < 1000000) {
         
-        //move ball position by one step
-
-        // Katie's math
-//        ballPos[0] += (4.0*cos(PI/4.0))*ball_timer;
-//        ballPos[1] += (4.0*sin(PI/4.0))*ball_timer - (.00098*(ball_timer^2)/2.0);
+        if(ballPos[1] < 0.08 && !hit) {
+            ball_timer = 0;
+            y_start = ballPos[1];
+            
+            v0 = 5.0*v0/6.0;
+            prev_xz = 0.0;
+            bounce_count++;
+            hit = true;
+        }
+        if(ballPos[1] > 0.08 && hit)
+            hit = false;
+            
+        if(bounce_count < 5) {
         
-        //Hayden's math
-        ballPos[2] -= ball_speed;
-        ballPos[1] += (ball_speed * ball_timer) + ((-.00032 * ball_timer * ball_timer) / 2);
+            float t=ball_timer/100.0;
         
-        //increment so movement eventually stops
+            //Math to throw the ball
+            float dist_xz = v0*t*cos(degree);
+            float xz_step = fabs(prev_xz - dist_xz);
+            prev_xz = dist_xz;
+        
+            ballPos[0] -= xz_step*sin(rotation);
+            ballPos[2] -= xz_step*cos(rotation);
+        
+            ballPos[1] = v0*t*sin(degree)-4.9*t*t+y_start;
+        }
+        else
+            ball_timer = 10000;
+            
+        //Increment time variable
         ball_timer++;
     }
     
@@ -505,7 +530,7 @@ void display(){
     //drawPlayer(human, humanMovement);
     
     // Draw the ball if necessary
-    if(ball_timer < 100000) {
+    if(ball_timer < 100000 && ballPos[1] > 0.0) {
         glPushMatrix();
         glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
         glColor3f(1.0, 1.0, 1.0);
@@ -547,6 +572,7 @@ void display(){
 
 /* 
  Mouse function
+ Throws ball
  */
 void mouse(int btn, int state, int x, int y)
 {
@@ -555,6 +581,13 @@ void mouse(int btn, int state, int x, int y)
         ballPos[0] = eye[0];
         ballPos[1] = eye[1];
         ballPos[2] = eye[2];
+        rotation = -theta-(PI/2.0);
+        prev_xz = 0.0;
+        bounce_count = 0.0;
+        y_start=0.5;
+        v0 = 6.0;
+        degree = PI/4.0;
+        hit = false;
     }
 }
 
