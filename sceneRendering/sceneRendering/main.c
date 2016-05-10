@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include "Lighting.h"
 #include "Player.h"
 #include "Scooter.h"
 
@@ -63,6 +63,17 @@ float walkSpeed = 0.1f; // Speed of walking (gets faster on scooter)
 
 bool scooter = false, extremes = false, hit=false;
 
+int th=0;         //  Azimuth of view angle
+int ph=10;         //  Elevation of view angle
+int fov=50;       //  Field of view (for perspective)
+double asp=1;     //  Aspect ratio
+double dim=24.0;   //  Size of world
+const int BufferSize = 10;
+
+GLuint BufferName[BufferSize];
+float zoom = 1; // incremetation base for zoom level
+
+
 HumanBody human;
 HumanMovement humanMovement;
 
@@ -76,9 +87,20 @@ enum View
     orthoginal
 };
 
+enum
+{
+    LEAF_VERTEX = 0,
+    LEAF_TEX = 1,
+    CYLINDER_FULL_VERTEX = 2,
+    CYLINDER_FULL_TEX = 3,
+    CYLINDER_END_VERTEX = 4,
+    CYLINDER_END_TEX = 5,
+    SQUARE_VERTEX = 6,
+    
+};
 void moveCamera()
 {
-    double * cameraOffset = setCameraShot(humanMovement, &human);
+    double * cameraOffset = setCameraShot(humanMovement, human);
     
     //Eye behind human
     eyePosition[0] = - human.height*2*cameraOffset[0]; //humanMovement.position[0] - human->height*2*cameraOffset[0];
@@ -106,7 +128,7 @@ void initHuman(double height)
     humanMovement.verticalAngle = 0;  //-10;
     humanMovement.horizontalAngle = -180; //45;
     humanMovement.moving = standing;
-    setCameraShot(humanMovement, &human);
+    setCameraShot(humanMovement, human);
 }
 
 
@@ -135,6 +157,24 @@ GLfloat vertic[][3]={{-1.5,0.0,1.5},{-1.5,0.0,-1.5},{1.5,0.0,-1.5},{1.5,0.0,1.5}
 
 GLfloat colors[][3]={{1.0,1.0,1.0},{0.0,0.0,0.0},{0.89019,0.38823,0.03921},{0.57254,0.44705,0.01176},{0.88235,0.0,0.03921},{0.00784,0.54509,0.0},
     {0.4588,0.6784,0.2509},{0.88235,0.67843,0.2},{0.35294117,0.3568627,0.3647059},{0.0,0.0,1.0}}; //0.white,1.black,2.orange,3.yellowish,4.red,5.green,6.car,7.orange,8.grey
+uint32_t frames = 0;
+uint32_t lastTime = 0;
+uint64_t previousTime;
+void animatePerson(uint32_t currentTime)
+{
+    //  Elapsed time in seconds
+    humanMovement.currentTime = currentTime;
+    frames++;
+    if(frames == 100)
+    {
+        printf("frames %u seconds %u FPS: %f\n", frames, currentTime,  frames/(currentTime - lastTime)*1000.0);
+        lastTime = currentTime;
+        frames = 0;
+    }
+    animatePlayer(human, humanMovement, currentTime- previousTime);
+}
+
+
 
 // Read texture image file
 unsigned int LoadTex(char *s)
@@ -459,7 +499,93 @@ void house()
     glutSolidSphere(0.5,20,20);
     glPopMatrix();
 }
+void setView(enum View view)
+{
+    
+    if (view == eye)
+    {
+        glMatrixMode (GL_PROJECTION);
+        //  Undo previous transformations
+        glLoadIdentity();
+        gluPerspective(fov,asp,dim/32,4*dim);
+        
+        //  Switch to manipulating the model matrix
+        glMatrixMode(GL_MODELVIEW);
+        //  Undo previous transformations
+        glLoadIdentity();
+        
+        double eyeNormal[3] = {0,1,0};
+		      
+        gluLookAt(eyePosition[0], eyePosition[1], eyePosition[2]
+                  , eyeFocus[0], eyeFocus[1], eyeFocus[2]
+                  , eyeNormal[0], eyeNormal[1], eyeNormal[2]);
+    }
+    //  Orthogonal - set world orientation
+    else if (view == orthoginal)
+    {
+        glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
+        glRotatef(ph,1,0,0);
+        glRotatef(th,0,1,0);
+        glScaled(zoom, zoom, zoom);
+    }
+    else if (view == projection)
+    {
+        glMatrixMode (GL_PROJECTION);      // Select The Projection Matrix
+        glLoadIdentity ();                // Reset The Projection Matrix
+        gluPerspective(fov,asp,dim/64,4*dim);
+        
+        glMatrixMode (GL_MODELVIEW);
+        glLoadIdentity ();                // Reset The Projection Matrix
+    }
+    // Sets this for culling
+//    ExtractFrustum();
+    //   ErrCheck("end setView");
+}
+void Scene(int light)
+{
+    //  Set light position and properties
+    Light(light);
+    
+    //    drawScene();
+    //    drawPlayer(human, humanMovement);
+}
+void displayLight()
+{
+    //  Draw light position as sphere (still no lighting here)
+    glColor3f(1,1,1);
+    glPushMatrix();
+    glTranslated(Lpos[0],Lpos[1],Lpos[2]);
+    //glutSolidSphere(0.3,10,10);
+    glPopMatrix();
+}
 
+void switchAxisToXYZ()
+{
+    glRotated(90,0,1,0);
+    glRotated(90,1,0,0);
+    glScaled(1,1,-1);
+}
+
+void displayPlayerViewport()
+{
+    glViewport (0, 0, w, h);
+    glPushMatrix();
+    setView(projection);
+    switchAxisToXYZ();
+    
+    double color1[3] = {0,1,1};
+    ball(10, 1, 0, .1, color1);
+    
+    double color2[3] = {0,1,1};
+    ball(10, 0, 1, .1, color2);
+    glPushMatrix();
+    glTranslated(1,0,0);
+    Scene(1);
+    drawPlayer(human, humanMovement);
+    glPopMatrix();
+    
+    glPopMatrix();
+}
 /* Idle function for animations */
 void idle()
 {
@@ -512,6 +638,27 @@ void idle()
     
 }
 
+void initSquare()
+{
+    float squareVertex[2*4] = {0,0,0,1,1,1,1,0};
+    printf("Init Square\n");
+    glGenBuffers(1, &BufferName[SQUARE_VERTEX]);
+    glBindBuffer(GL_ARRAY_BUFFER, BufferName[SQUARE_VERTEX]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2*4, squareVertex, GL_STATIC_DRAW);
+    //  ErrCheck("INIT LEAF VERTEX BUFFER");
+    // Reset
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void initShapes()
+{
+    /* Allocate and assigns buffers*/
+    printf("init shapes\n");
+    initSquare();
+    printf("done initing shapes\n");
+    //
+}
+
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.6,0.6,1.0,1.0);
@@ -527,7 +674,7 @@ void display(){
     texGround();
     cloud();
     sun();
-    //drawPlayer(human, humanMovement);
+    displayPlayerViewport();
     
     // Draw the ball if necessary
     if(ball_timer < 100000 && ballPos[1] > 0.0) {
@@ -607,7 +754,10 @@ void keyboard(unsigned char key, int x, int z)
         eye[2] -= step*cos(-theta - (PI/2.0));
         at[2] -= step*cos(-theta - (PI/2.0));
     }
-    
+    if (key == '-' && key>1)
+        fov--;
+    if (key == '+' && key<179)
+        fov++;
     else if((key == 's') || (key == 'S')) {
         
         eye[0] += step*sin(-theta - (PI/2.0));
@@ -717,6 +867,9 @@ int main(int argc, char *argv[])
     glutCreateWindow("Final Project");
     
     init();
+    initHuman(0.44);
+    initShapes();
+    
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutIdleFunc(display);

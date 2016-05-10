@@ -12,18 +12,20 @@
 #endif
 
 
-  double frontOfHumanEye[3];
-  double cameraShot[3];
-  double aboveHumanEye[3];
-  double rightOfHumanEye[3];
-  double frontOfHuman[3];
-  double aboveHuman[3];
-  double rightOfHuman[3];
+
 
 
 #define GL_PI 3.1415f // Define a constant for the value of PI
 
 double bodyRotate = 0;
+double frontOfHumanEye[3];
+double cameraShot[3];
+double aboveHumanEye[3];
+double rightOfHumanEye[3];
+double frontOfHuman[3];
+double aboveHuman[3];
+double rightOfHuman[3];
+
 int inc       =   10;  // Ball increment
 
 // mouse position variables, interface variables
@@ -38,6 +40,7 @@ GLfloat m_y2PosPrev = 0;
 int m_LeftButtonDown = 0;
 int m_RightButtonDown = 0;
 
+coordinate Cordinate;
 
 
 GLfloat humanColor[] = {255/255.0, 228/255.0, 181/255.0};
@@ -46,40 +49,6 @@ double animationScaleForawrd = 0; //Used for starting and starting animation
 double animationScaleRight = 0;
 double animationScaleRotate = 0;
 const double ANIMATION_MAX = 20;
-
-typedef struct coordinate coordinate;
-struct coordinate
-{
-    double x;
-    double y;
-    double z;
-
-    double array[3];
-} ;
-coordinate Coordinate;
-void translate(double xAmmount, double yAmmount, double zAmmount)
-{
-
-    Coordinate.x += xAmmount;
-    Coordinate.y = yAmmount;
-    Coordinate.z = zAmmount;
-}
-
-void scale(double xAmmount, double yAmmount, double zAmmount)
-{
-    Coordinate.x *= xAmmount;
-    Coordinate.y *= yAmmount;
-    Coordinate.z *= zAmmount;
-}
-
-double * toArray()
-{
-    Coordinate.array[0] = Coordinate.x;
-    Coordinate.array[1] = Coordinate.y;
-    Coordinate.array[2] = Coordinate.z;
-    return Coordinate.array;
-}
-
 
 
 void animateArm(HumanBody human, HumanMovement movement, Limb arm, double position)
@@ -221,7 +190,7 @@ double dmod(double input, double mod)
     {
         input += mod;
     }
-    return input; 
+    return input;
 }
 
 void movePlayer(HumanMovement movement, uint32_t elapsedTimeMS)
@@ -330,6 +299,36 @@ void CheckRestrictions(HumanBody H)
 /*
  *  Draw vertex in polar coordinates with normal
  */
+void translate(double xAmmount, double yAmmount, double zAmmount)
+{
+    
+    Cordinate.x = xAmmount;
+    Cordinate.y = yAmmount;
+    Cordinate.z = zAmmount;
+}
+
+void scale(double xAmmount, double yAmmount, double zAmmount)
+{
+    Cordinate.x *= xAmmount;
+    Cordinate.y *= yAmmount;
+    Cordinate.z *= zAmmount;
+}
+double * toArray()
+{
+    Cordinate.arrayH[0] = Cordinate.x;
+    Cordinate.arrayH[1] = Cordinate.y;
+    Cordinate.arrayH[2] = Cordinate.z;
+    return Cordinate.arrayH;
+}
+
+coordinate convertFromCylindrical(double radius, double theta, double z)
+{
+    coordinate rectangular;
+    rectangular.x = radius*Cos(theta);
+    rectangular.y = radius*Sin(theta);
+    rectangular.z = z;
+    return rectangular;
+}
 coordinate convertFromSpherical(double th, double ph, double r)
 {
     coordinate rectangular;
@@ -393,20 +392,20 @@ void ovoid(double x, double y, double z, double rx, double ry, double rz, double
         glDisable(GL_TEXTURE_2D);
     }
 }
-void ball(double x, double y, double z, double r, double color[3], unsigned int texture, int enableTextures)
+void baller(double x, double y, double z, double r, double color[3], unsigned int texture, int enableTextures)
 {
     ovoid(x, y, z, r, r, r, color, texture, enableTextures);
 }
 
-void baller(double x,double y,double z,double r, double color[3])
+void ball(double x,double y,double z,double r, double color[3])
 {
-    ball(x, y, z, r, color, 0, 0);
+    baller(x, y, z, r, color, 0, 0);
 }
 void drawHand(HumanBody H)
 {
     glPushMatrix();
     glColor3f(1,1,1);
-    baller(0, 0, 0, 3, NULL);
+    //    baller(0, 0, 0, 3, NULL);
     glPopMatrix();
 }
 
@@ -423,7 +422,7 @@ void drawFoot(HumanBody H)
     glPopMatrix();
 }
 
-void modelLimb(Limb limb, HumanBody *H, void (*drawEnd) (HumanBody), Side side)
+void modelLimb(Limb limb, HumanBody H, void (*drawEnd)(HumanBody), Side side)
 {
     glPushMatrix();
     glRotatef(limb.yLimbRot, 0.0f, 0.0f, 1.0f);
@@ -443,24 +442,25 @@ void modelLimb(Limb limb, HumanBody *H, void (*drawEnd) (HumanBody), Side side)
     }
     glRotatef(zLimbRot, 0.0f, 1.0f, 0.0f);
     glColor3fv(humanColor);
-    gluCylinder(H->obj, H->BoneRad, H->BoneRad, limb.length/2, H->faces, H->faces);
+    gluCylinder(H.obj, H.BoneRad, H.BoneRad, limb.length/2, H.faces, H.faces);
     glColor3fv(humanColor);
-    gluSphere(H->obj, H->JointRad, H->faces, H->faces);
+    gluSphere(H.obj, H.JointRad, H.faces, H.faces);
     glTranslatef(0.0, 0.0, limb.length/2);
     glRotatef(limb.xElbowRot, -1.0, 0.0, 0.0);						// elbow joint
     
-    gluCylinder(H->obj, H->BoneRad, H->BoneRad, limb.length/2, H->faces, H->faces);
+    gluCylinder(H.obj, H.BoneRad, H.BoneRad, limb.length/2, H.faces, H.faces);
     glPushMatrix();
     glTranslated(0,0,limb.length/2);
-    drawEnd(*H);
+    (*drawEnd)(H);
     glPopMatrix();
     glColor3fv(humanColor);
-    gluSphere(H->obj, H->JointRad, H->faces, H->faces);
+    gluSphere(H.obj, H.JointRad, H.faces, H.faces);
     glPopMatrix();
 }
 
 void modelLeg(Limb limb, HumanBody H, Side side)
 {
+    
     glTranslatef(0,  -H.lSpine -H.rightLeg.length,0);
     glPushMatrix();
     
@@ -469,7 +469,7 @@ void modelLeg(Limb limb, HumanBody H, Side side)
     glTranslated(0, limb.length, 0);
     glRotatef(90, 1.0, 0.0, 0.0);
     
-    modelLimb(limb, &H, &drawFoot, side);
+    modelLimb(limb, H, drawFoot, side);
     
     glTranslatef(0.0f, 0.0f, limb.length);
     glRotatef(H.xHipRot, -1.0f, 0.0f, 0.0f);						// hip joint
@@ -529,7 +529,7 @@ void modelHeadAndNeck(HumanBody
           H.rHead*.75,
           NULL, 0, 0);
     glRotated(90, 1, 0, 0);
-    gluCylinder(H.obj, H.BoneRad, H.BoneRad, H.rHead/2, 10, 10);
+    //    gluCylinder(H.obj, H.BoneRad, H.BoneRad, H.rHead/2, 10, 10);
     glPopMatrix();
     
     // end Head
@@ -563,7 +563,7 @@ void ModelBody(HumanBody H)
     ModelTorso(H);
     
     modelHeadAndNeck(H);
-
+    
     
     // shoulders and back
     glPushMatrix();
@@ -577,7 +577,7 @@ void ModelBody(HumanBody H)
     glPushMatrix();
     glRotatef(90, 1.0, 0.0, 0.0);
     glTranslatef(-H.wBack/2, 0.0, 0.0);
-    modelLimb(H.rightArm, &H, &drawHand, right);
+    modelLimb(H.rightArm, H, drawHand, right);
     glPopMatrix();
     // end right arm
     
@@ -585,8 +585,8 @@ void ModelBody(HumanBody H)
     glPushMatrix();
     glRotatef(90, 1.0, 0.0, 0.0);
     glTranslatef(H.wBack/2, 0.0, 0.0);
-    modelLimb(H.leftArm, &H, &drawHand, left);
-    glPopMatrix(); 
+    modelLimb(H.leftArm, H, drawHand, left);
+    glPopMatrix();
     // end left arm
     
     glPopMatrix(); // end model
@@ -599,47 +599,48 @@ void initLimb(Limb limb, double length)
     ;
     limb.zLimbRot	= 0;
     limb.xElbowRot	= 1; // Cannot start w/ all joint angles at 0;
-    limb.length = length; 
+    limb.length = length;
 }
 
 
 HumanBody HumanInit(double height)
 {
     
-    HumanBody *hum = malloc(sizeof(HumanBody));
+    //    HumanBody *hum = malloc(sizeof(HumanBody));
+    HumanBody hum;
+    initLimb(hum.leftArm, 40);
+    initLimb(hum.rightArm, 40);
+    initLimb(hum.leftLeg, 60);
+    initLimb(hum.rightLeg, 60);
+    hum.wholeBodyRotate = 0;
+    hum.xHipRot	= 0;
+    hum.xKneeRot	= 0;
+    hum.xAnkleRot	= 0;
+    hum.xToeRot	= 0;
+    hum.xNeckRot	= 0;
+    hum.yNeckRot	= 0;
+    hum.xBackRot	= 0;
+    hum.yBackRot	= 0;
+    hum.zBackRot	= 0;
+    hum.JointRad	= 3;
+    hum.BoneRad	= 2;
+    hum.rHead		= 20;
+    hum.wPelvis	= 20;
+    hum.lSpine		= 40;
+    hum.wBack		= 40;
+    hum.lFoot		= 10;
+    hum.faces		= 5; // low res polygons for speed
     
-    initLimb(hum->leftArm, 40); 
-    initLimb(hum->rightArm, 40); 
-    initLimb(hum->leftLeg, 60); 
-    initLimb(hum->rightLeg, 60); 
-    hum->wholeBodyRotate = 0; 
-    hum->xHipRot	= 0;
-    hum->xKneeRot	= 0;
-    hum->xAnkleRot	= 0;
-    hum->xToeRot	= 0;
-    hum->xNeckRot	= 0;
-    hum->yNeckRot	= 0;
-    hum->xBackRot	= 0;
-    hum->yBackRot	= 0;
-    hum->zBackRot	= 0;
-    hum->JointRad	= 3;
-    hum->BoneRad	= 2;
-    hum->rHead		= 10;
-    hum->wPelvis	= 20;
-    hum->lSpine		= 40;
-    hum->wBack		= 40;
-    hum->lFoot		= 10;
-    hum->faces		= 5; // low res polygons for speed
+    hum.height = height;
+    hum.scalingFactor
+    = height/((hum.lSpine + hum.rightLeg.length));
+    printf("scaling factor %f\n", hum.scalingFactor);
     
-    hum->height = height; 
-    hum->scalingFactor 
-    = height/((hum->lSpine + hum->rightLeg.length));
-    printf("scaling factor %f\n", hum->scalingFactor); 
-    
-    hum->obj		= gluNewQuadric(); // new var for quadric object.
+    hum.obj		= gluNewQuadric(); // new var for quadric object.
     
     
-    return *hum;
+    return hum;
+    
 }
 
 

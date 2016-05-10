@@ -18,7 +18,7 @@
 #ifndef Tan
 #define Tan(th) tan(3.1415927/180*(th))
 #endif
-
+#include <math.h>
 
 extern double frontOfHumanEye[3];
 extern double cameraShot[3];
@@ -51,6 +51,7 @@ typedef enum Side
 
 // data structure for body information
 typedef struct HumanBody{
+    
     double scalingFactor;
     double height;
     Limb leftArm;
@@ -83,6 +84,13 @@ typedef struct HumanBody{
     GLUquadricObj *obj;	// quadric object init
     
 } HumanBody;
+
+typedef struct coordinate{
+    double x;
+    double y;
+    double z;
+    double arrayH[3];
+} coordinate;
 
 
 enum movementType
@@ -124,11 +132,11 @@ void animatePlayer(HumanBody human,HumanMovement movement, uint32_t elapsedTimeM
 
 static inline double * getFrontOfHumanEye(HumanMovement movement)
 {
-    frontOfHumanEye[0] = Cos(movement.verticalAngle) *
-    Cos(movement.horizontalAngle);
-    frontOfHumanEye[1] = Sin(movement.verticalAngle);
-    frontOfHumanEye[2] = Cos(movement.verticalAngle) *
-    Sin(movement.horizontalAngle);
+    frontOfHumanEye[0] = cos(movement.verticalAngle) *
+    cos(movement.horizontalAngle);
+    frontOfHumanEye[1] = sin(movement.verticalAngle);
+    frontOfHumanEye[2] = cos(movement.verticalAngle) *
+    sin(movement.horizontalAngle);
     return frontOfHumanEye;
 };
 
@@ -137,32 +145,32 @@ static inline double * getCameraShot()
 {
     return cameraShot;
 }
-static inline double * setCameraShot(HumanMovement movement, HumanBody *human)
+static inline double * setCameraShot(HumanMovement movement, HumanBody human)
 {
-    cameraShot[0] = Cos(movement.verticalAngle - 10) *
-    Cos(movement.horizontalAngle  );
-    cameraShot[1] = Sin(movement.verticalAngle - 10);
-    cameraShot[2] = Cos(movement.verticalAngle - 10) *
-    Sin(movement.horizontalAngle  );
+    cameraShot[0] = cos(movement.verticalAngle - 10) *
+    cos(movement.horizontalAngle  );
+    cameraShot[1] = sin(movement.verticalAngle - 10);
+    cameraShot[2] = cos(movement.verticalAngle - 10) *
+    sin(movement.horizontalAngle  );
     return cameraShot;
 };
 
 static inline double * setAboveHumanEye(HumanMovement movement)
 {
-    aboveHumanEye[0] = Cos(movement.verticalAngle + 90) *
-    Cos(movement.horizontalAngle);
-    aboveHumanEye[1] = Sin(movement.verticalAngle + 90);
+    aboveHumanEye[0] = cos(movement.verticalAngle + 90) *
+    cos(movement.horizontalAngle);
+    aboveHumanEye[1] = sin(movement.verticalAngle + 90);
     aboveHumanEye[2] = 0;
     return aboveHumanEye;
 };
 
 static inline double * setRightOfHumanEye(HumanMovement movement)
 {
-    rightOfHumanEye[0] = Cos(movement.verticalAngle) *
-    Cos(movement.horizontalAngle + 90 );
+    rightOfHumanEye[0] = cos(movement.verticalAngle) *
+    cos(movement.horizontalAngle + 90 );
     rightOfHumanEye[1] = 0;
-    rightOfHumanEye[2] = Cos(movement.verticalAngle) *
-    Sin(movement.horizontalAngle + 90);
+    rightOfHumanEye[2] = cos(movement.verticalAngle) *
+    sin(movement.horizontalAngle + 90);
     return rightOfHumanEye;
 };
 
@@ -170,9 +178,9 @@ static inline double * setRightOfHumanEye(HumanMovement movement)
 //Keeps the person on the ground
 static inline double * setFrontOfHuman(HumanMovement movement)
 {
-    frontOfHuman[0] = Cos(movement.horizontalAngle);
+    frontOfHuman[0] = cos(movement.horizontalAngle);
     frontOfHuman[1] = 0;
-    frontOfHuman[2] = Sin(movement.horizontalAngle);
+    frontOfHuman[2] = sin(movement.horizontalAngle);
     return frontOfHuman;
 };
 
@@ -186,10 +194,37 @@ static inline double * setAboveHuman(HumanMovement movement)
 
 static inline double * setRightOfHuman(HumanMovement movement)
 {
-    rightOfHuman[0] = Cos(movement.horizontalAngle + 90 );
-    rightOfHuman[1] = 0; 
-    rightOfHuman[2] = Sin(movement.horizontalAngle + 90); 
-    return rightOfHuman; 
+    rightOfHuman[0] = cos(movement.horizontalAngle + 90 );
+    rightOfHuman[1] = 0;
+    rightOfHuman[2] = sin(movement.horizontalAngle + 90);
+    return rightOfHuman;
 };
+
+
+void translate(double xAmmount, double yAmmount, double zAmmount);
+
+void scale(double xAmmount, double yAmmount, double zAmmount);
+
+double * toArray();
+coordinate convertFromCylindrical(double radius, double theta, double z);
+
+
+coordinate convertFromSpherical(double th, double ph, double r);
+
+//    coordinate rectangular;
+//    rectangular.x = r*Sin(th)*Cos(ph);
+//    rectangular.y = r*Cos(th)*Cos(ph);
+//    rectangular.z =         r*Sin(ph);
+//    return rectangular;
+
+void Vertex(double th,double ph, double r);
+void ovoid(double x, double y, double z, double rx, double ry, double rz,
+           double color[3], unsigned int texture, int enableTextures);
+
+void ball(double x,double y,double z,double r, double color[3]);
+void baller(double x, double y, double z, double r, double color[3], unsigned int texture, int enableTextures);
+
+
+
 
 #endif
