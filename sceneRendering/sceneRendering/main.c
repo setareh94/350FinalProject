@@ -649,6 +649,11 @@ void idle()
         down = false;
     }
     
+    //aNIMATE PERSON
+    uint32_t currentTime = glutGet(GLUT_ELAPSED_TIME);
+    
+    animatePerson(currentTime);
+    
     //redraw
     glutPostRedisplay();
     
@@ -785,6 +790,8 @@ void keyboard(unsigned char key, int x, int z)
         at[0] -= step*sin(-theta - (PI/2.0))*walkSpeed;
         eye[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
+        humanMovement.forwardMovement = 1;
+
     }
     if (key == '-' && key>1)
         fov--;

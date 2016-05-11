@@ -67,8 +67,8 @@ HumanBody HumanInit(double height)
     
     //    HumanBody *hum = malloc(sizeof(HumanBody));
     HumanBody hum;
-    initLimb(hum.leftArm, 40);
-    initLimb(hum.rightArm, 40);
+    initLimb(hum.leftArm, 20);
+    initLimb(hum.rightArm, 20);
     initLimb(hum.leftLeg, 60);
     initLimb(hum.rightLeg, 60);
     hum.wholeBodyRotate = 0;
@@ -84,9 +84,9 @@ HumanBody HumanInit(double height)
     hum.JointRad	= 3;
     hum.BoneRad	= 2;
     hum.rHead		= 20;
-    hum.wPelvis	= 20;
+    hum.wPelvis	= 10;
     hum.lSpine		= 40;
-    hum.wBack		= 40;
+    hum.wBack		= 10;
     hum.lFoot		= 10;
     hum.faces		= 5; // low res polygons for speed
     
@@ -101,6 +101,8 @@ HumanBody HumanInit(double height)
     return hum;
     
 }
+
+
 
 void animateArm(HumanBody human, HumanMovement movement, Limb arm, double position)
 {
@@ -309,7 +311,7 @@ double dmod(double input, double mod)
 void drawPlayer(HumanBody human,HumanMovement movement)
 {
     glPushMatrix();
-    glRotated(90,1,0,0);
+    glRotated(120,1,1,1);
     glScaled(human.scalingFactor, human.scalingFactor, human.scalingFactor);
     glRotated(movement.horizontalAngle + 180 + human.wholeBodyRotate, 0, 1, 0);
     //movement.horizontalAngle + 180 + human->wholeBodyRotate
@@ -463,7 +465,7 @@ void drawHand(HumanBody H)
 void drawFoot(HumanBody H)
 {
     glPushMatrix();
-    glRotated(-90,1,0,0);
+//    glRotated(-90,1,0,0);
     glColor3fv(humanColor);
     gluSphere(H.obj, H.JointRad, H.faces, H.faces);				// ankle
     glRotatef(H.xToeRot, -1.0f, 0.0f, 0.0f);						// toe "joint" on floor
@@ -501,7 +503,8 @@ void modelLimb(Limb limb, HumanBody H, Side side)
     
     gluCylinder(H.obj, H.BoneRad, H.BoneRad, 40/2, H.faces, H.faces);
     glPushMatrix();
-    glTranslated(0,0,limb.length/2);
+    glTranslated(0,0,40);
+    drawHand(H);
     glPopMatrix();
     glColor3fv(humanColor);
     gluSphere(H.obj, H.JointRad, H.faces, H.faces);
@@ -589,16 +592,19 @@ void modelHeadAndNeck(HumanBody
 
 void ModelBody(HumanBody H)
 {
+    
     glPushMatrix();							// save matrix before modelling.
     
     // build lower body
     // build with toes first. enable tiptoes.
     
     // left leg
+    
+    
     glPushMatrix();
     glTranslatef(H.wPelvis/2, 0, 0);
-//    modelLeg(H.leftLeg, H, left);
-//    glPopMatrix();									// undo hip displacement from toe movement
+    modelLeg(H.leftLeg, H, left);
+    glPopMatrix();									// undo hip displacement from toe movement
     // end left leg
     
     // right leg
@@ -606,31 +612,35 @@ void ModelBody(HumanBody H)
     glTranslatef(-H.wPelvis/2
                  
                  , 0, 0);
-//    modelLeg(H.rightLeg, H, right);
-//    glPopMatrix();
+    modelLeg(H.rightLeg, H, right);
+    glPopMatrix();
     // end right leg
     
-//    ModelTorso(H);
+    ModelTorso(H);
     
 //    modelHeadAndNeck(H);
     
     
     // shoulders and back
-//    glPushMatrix();
-//    glRotatef(90.0f, 0.0f, 1.0, 0.0f);
-//    glTranslatef(0.0f, 0.0f, -H.wBack/2);
-//    gluCylinder(gluNewQuadric(), 2, 2, H.wBack, 10, 10);
-//    glPopMatrix();
+    glPushMatrix();
+    glRotatef(90.0f, 0.0f, 1.0, 0.0f);
+    glTranslatef(0.0f, 0.0f, -5);
+    gluCylinder(H.obj, 2, 2, H.wBack, 10, 10);
+    glPopMatrix();
     // end shoulders and back
     
     // right arm
     glPushMatrix();
     glRotatef(90, 1.0, 0.0, 0.0);
     glTranslatef(-H.wBack/2, 0.0, 0.0);
-//    gluCylinder(gluNewQuadric(), 4, 2, H.wBack, 10, 10);
-
     modelLimb(H.rightArm, H, right);
     glPopMatrix();
+    glPushMatrix();
+    glRotatef(90, 1.0, 0.0, 0.0);
+    glTranslatef(-H.wBack/2, 0.0, 12.0);
+    modelLimb(H.rightArm, H, right);
+    glPopMatrix();
+
     // end right arm
     
     // left arm
@@ -639,7 +649,14 @@ void ModelBody(HumanBody H)
     glTranslatef(H.wBack/2, 0.0, 0.0);
     modelLimb(H.leftArm, H, left);
     glPopMatrix();
+    glPushMatrix();
+    glRotatef(90, 1.0, 0.0, 0.0);
+    glTranslatef(H.wBack/2, 0.0, 12.0);
+    modelLimb(H.leftArm, H, left);
+    glPopMatrix();
+
     // end left arm
+
     
     glPopMatrix(); // end model
     
