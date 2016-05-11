@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include "Lighting.h"
 #include "Player.h"
-#include "Scooter.h"
 
 #define ourImageWidth 256
 #define ourImageHeight 256
@@ -59,9 +58,11 @@ float angle = 0.0f; // angle for rotating triangle
 double eyePosition[3];
 double eyeFocus[3];
 
-float walkSpeed = 0.1f; // Speed of walking (gets faster on scooter)
+float walkSpeed = 1.0f; // Speed of walking (gets faster on bike)
+float roty=0.0;         // for rotating bike
+float transx=0.0, transz=0.0;   // for translating the bike
 
-bool scooter = false, extremes = false, hit=false;
+bool bike = false, extremes = false, hit=false, jump=false, down=false;
 
 int th=0;         //  Azimuth of view angle
 int ph=10;         //  Elevation of view angle
@@ -72,7 +73,6 @@ const int BufferSize = 10;
 
 GLuint BufferName[BufferSize];
 float zoom = 1; // incremetation base for zoom level
-
 
 HumanBody human;
 HumanMovement humanMovement;
@@ -98,7 +98,9 @@ enum
     SQUARE_VERTEX = 6,
     
 };
-void moveCamera()
+
+// I don't think we need this
+/*void moveCamera()
 {
     double * cameraOffset = setCameraShot(humanMovement, human);
     
@@ -111,7 +113,7 @@ void moveCamera()
     eyeFocus[0] = 0;  //humanMovement.position[0];
     eyeFocus[1] = + human.height * .1; //humanMovement.position[1] + human->height * .1;
     eyeFocus[2] = - human.height * .1; //humanMovement.position[2] - human->height * .1;
-}
+}*/
 
 void initHuman(double height)
 {
@@ -160,6 +162,7 @@ GLfloat colors[][3]={{1.0,1.0,1.0},{0.0,0.0,0.0},{0.89019,0.38823,0.03921},{0.57
 uint32_t frames = 0;
 uint32_t lastTime = 0;
 uint64_t previousTime;
+
 void animatePerson(uint32_t currentTime)
 {
     //  Elapsed time in seconds
@@ -173,8 +176,6 @@ void animatePerson(uint32_t currentTime)
     }
     animatePlayer(human, humanMovement, currentTime- previousTime);
 }
-
-
 
 // Read texture image file
 unsigned int LoadTex(char *s)
@@ -499,6 +500,7 @@ void house()
     glutSolidSphere(0.5,20,20);
     glPopMatrix();
 }
+
 void setView(enum View view)
 {
     
@@ -633,6 +635,22 @@ void idle()
         m = -30;
     }
     
+    //jump
+    if(jump && eye[1]<3.0 && !down) {
+        eye[1] += 0.3;
+        at[1] += 0.3;
+    }
+    else if(jump && eye[1] > 3.0 && !down)
+        down = true;
+    else if(jump && down && eye[1]>1.0) {
+        eye[1] -= 0.3;
+        at[1] -= 0.3;
+    }
+    else {
+        jump = false;
+        down = false;
+    }
+    
     //redraw
     glutPostRedisplay();
     
@@ -674,8 +692,25 @@ void display(){
     texGround();
     cloud();
     sun();
-    displayPlayerViewport();
+    
+    glPushMatrix();
+    
+    // If bike is activated, rotate and translate accordingly (don't draw person)
+    if(bike) {
+        roty = -theta;
+        glTranslatef(eye[0]+9.0, 0.1, eye[2]-1.0);
+    }
+    // Otherwise just translate it to where it was left last and draw person
+    else {
+        displayPlayerViewport();
+        glTranslatef(transx, 0.0, transz);
+    }
+    // Draw bike
+    glTranslatef(-9.0, 0.0, 1.0);
+    glRotatef(roty*180/PI, 0.0, 1.0, 0.0);
+    glTranslatef(9.0, 0.0, -1.0);
     displayBike();
+    glPopMatrix();
     
     // Draw the ball if necessary
     if(ball_timer < 100000 && ballPos[1] > 0.0) {
@@ -709,11 +744,6 @@ void display(){
             glPopMatrix();
         }
     
-//    glPushMatrix();
-//    if(scooter)
-//        drawScooter(eye[0], eye[1], eye[2]);
-//    glPopMatrix();
-    
     glutSwapBuffers();
     
 }
@@ -745,15 +775,18 @@ void mouse(int btn, int state, int x, int y)
  s : move backward
  a : strafe left
  d : strafe right
+ space: mount bike (if within distance)
+ enter: jump
+ esc: quit
  */
 void keyboard(unsigned char key, int x, int z)
 {
     if((key == 'w') || (key == 'W')) {
         
-        eye[0] -= step*sin(-theta - (PI/2.0));
-        at[0] -= step*sin(-theta - (PI/2.0));
-        eye[2] -= step*cos(-theta - (PI/2.0));
-        at[2] -= step*cos(-theta - (PI/2.0));
+        eye[0] -= step*sin(-theta - (PI/2.0))*walkSpeed;
+        at[0] -= step*sin(-theta - (PI/2.0))*walkSpeed;
+        eye[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
+        at[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
     }
     if (key == '-' && key>1)
         fov--;
@@ -761,34 +794,43 @@ void keyboard(unsigned char key, int x, int z)
         fov++;
     else if((key == 's') || (key == 'S')) {
         
-        eye[0] += step*sin(-theta - (PI/2.0));
-        at[0] += step*sin(-theta - (PI/2.0));
-        eye[2] += step*cos(-theta - (PI/2.0));
-        at[2] += step*cos(-theta - (PI/2.0));
+        eye[0] += step*sin(-theta - (PI/2.0))*walkSpeed;
+        at[0] += step*sin(-theta - (PI/2.0))*walkSpeed;
+        eye[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
+        at[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
     }
     
     else if((key == 'a') || (key == 'A')) {
         
-        eye[0] -= step*sin(-theta);
-        at[0] -= step*sin(-theta);
-        eye[2] -= step*cos(-theta);
-        at[2] -= step*cos(-theta);
+        eye[0] -= step*sin(-theta)*walkSpeed;
+        at[0] -= step*sin(-theta)*walkSpeed;
+        eye[2] -= step*cos(-theta)*walkSpeed;
+        at[2] -= step*cos(-theta)*walkSpeed;
     }
     
     else if((key == 'd') || (key == 'D')) {
         
-        eye[0] += step*sin(-theta);
-        at[0] += step*sin(-theta);
-        eye[2] += step*cos(-theta);
-        at[2] += step*cos(-theta);
+        eye[0] += step*sin(-theta)*walkSpeed;
+        at[0] += step*sin(-theta)*walkSpeed;
+        eye[2] += step*cos(-theta)*walkSpeed;
+        at[2] += step*cos(-theta)*walkSpeed;
     }
 
     else if(key == 32) {
-        if(scooter)
-            walkSpeed = 0.1f;
-        else
-            walkSpeed = 0.5f;
-        scooter = !scooter;
+        if(!bike && fabs(eye[0]+9.0-transx)<2.0 && fabs(eye[2]-1.0-transz)<2.0) {
+            walkSpeed = 3.0f;
+            bike = true;
+        }
+        else if(bike){
+            walkSpeed = 1.0f;
+            bike = false;
+            transx = eye[0]+9.0;
+            transz = eye[2]-1.0;
+        }
+    }
+    
+    else if(key == 13 && !bike) {
+        jump = true;
     }
     
     else if(key == 27) {

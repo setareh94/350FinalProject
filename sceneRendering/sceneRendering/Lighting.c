@@ -16,7 +16,7 @@ extern double eyePosition[3];
 int light     =   1;  //  Lighting
 int moveLight     =   1;  // Move Light
 int one       =   1;  // Unit value
-int distance  =   128;  // Light distance
+int distance  =   200;  // Light distance
 int ballinc       =   10;  // Ball increment
 int smooth    =   0;  // Smooth/Flat shading
 int local     =   0;  // Local Viewer Model

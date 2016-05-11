@@ -48,9 +48,6 @@ GLfloat pedalAngle, speed, steering;
 GLfloat camx,camy,camz;
 GLfloat anglex,angley,anglez;
 
-
-
-
 void ZCylinder(GLfloat radius,GLfloat length)
 {
     GLUquadricObj *cylinder;
