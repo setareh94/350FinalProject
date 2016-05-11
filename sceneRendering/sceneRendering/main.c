@@ -130,7 +130,7 @@ void initHuman(double height)
     humanMovement.verticalAngle = 0;  //-10;
     humanMovement.horizontalAngle = -180; //45;
     humanMovement.moving = standing;
-    setCameraShot(humanMovement, human);
+//    setCameraShot(humanMovement, human);
 }
 
 
@@ -501,55 +501,51 @@ void house()
     glPopMatrix();
 }
 
-void setView(enum View view)
-{
-    
-    if (view == eye)
-    {
-        glMatrixMode (GL_PROJECTION);
-        //  Undo previous transformations
-        glLoadIdentity();
-        gluPerspective(fov,asp,dim/32,4*dim);
-        
-        //  Switch to manipulating the model matrix
-        glMatrixMode(GL_MODELVIEW);
-        //  Undo previous transformations
-        glLoadIdentity();
-        
-        double eyeNormal[3] = {0,1,0};
-		      
-        gluLookAt(eyePosition[0], eyePosition[1], eyePosition[2]
-                  , eyeFocus[0], eyeFocus[1], eyeFocus[2]
-                  , eyeNormal[0], eyeNormal[1], eyeNormal[2]);
-    }
-    //  Orthogonal - set world orientation
-    else if (view == orthoginal)
-    {
-        glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
-        glRotatef(ph,1,0,0);
-        glRotatef(th,0,1,0);
-        glScaled(zoom, zoom, zoom);
-    }
-    else if (view == projection)
-    {
-        glMatrixMode (GL_PROJECTION);      // Select The Projection Matrix
-        glLoadIdentity ();                // Reset The Projection Matrix
-        gluPerspective(fov,asp,dim/64,4*dim);
-        
-        glMatrixMode (GL_MODELVIEW);
-        glLoadIdentity ();                // Reset The Projection Matrix
-    }
-    // Sets this for culling
-//    ExtractFrustum();
-    //   ErrCheck("end setView");
-}
+//void setView(enum View view)
+//{
+//    
+//    if (view == eye)
+//    {
+//        glMatrixMode (GL_PROJECTION);
+//        //  Undo previous transformations
+//        glLoadIdentity();
+//        gluPerspective(fov,asp,dim/32,4*dim);
+//        
+//        //  Switch to manipulating the model matrix
+//        glMatrixMode(GL_MODELVIEW);
+//        //  Undo previous transformations
+//        glLoadIdentity();
+//        
+//        double eyeNormal[3] = {0,1,0};
+//		      
+//        gluLookAt(eyePosition[0], eyePosition[1], eyePosition[2]
+//                  , eyeFocus[0], eyeFocus[1], eyeFocus[2]
+//                  , eyeNormal[0], eyeNormal[1], eyeNormal[2]);
+//    }
+//    //  Orthogonal - set world orientation
+//    else if (view == orthoginal)
+//    {
+//        glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
+//        glRotatef(ph,1,0,0);
+//        glRotatef(th,0,1,0);
+//        glScaled(zoom, zoom, zoom);
+//    }
+//    else if (view == projection)
+//    {
+////        glMatrixMode (GL_PROJECTION);      // Select The Projection Matrix
+////        glLoadIdentity ();                // Reset The Projection Matrix
+////        gluPerspective(fov,asp,dim/64,4*dim);
+////        
+////        glMatrixMode (GL_MODELVIEW);
+////        glLoadIdentity ();                // Reset The Projection Matrix
+//    }
+//    // Sets this for culling
+////    ExtractFrustum();
+//    //   ErrCheck("end setView");
+//}
 void Scene(int light)
-{
-    //  Set light position and properties
-    Light(light);
-    
-    //    drawScene();
-    //    drawPlayer(human, humanMovement);
+{    Light(light);
+     drawPlayer(human, humanMovement);
 }
 void displayLight()
 {
@@ -570,9 +566,10 @@ void switchAxisToXYZ()
 
 void displayPlayerViewport()
 {
-    glViewport (0, 0, w, h);
+//    glViewport (0, 0, w, h);
     glPushMatrix();
-    setView(projection);
+    glPushMatrix();
+    glLoadIdentity();
     switchAxisToXYZ();
     
     double color1[3] = {0,1,1};
@@ -583,9 +580,10 @@ void displayPlayerViewport()
     glPushMatrix();
     glTranslated(1,0,0);
     Scene(1);
-    drawPlayer(human, humanMovement);
+//    drawPlayer(human, humanMovement);
+    glScalef(0.5, 0.5, 0.5);
     glPopMatrix();
-    
+    glPopMatrix();
     glPopMatrix();
 }
 /* Idle function for animations */
@@ -910,7 +908,7 @@ int main(int argc, char *argv[])
     glutCreateWindow("Final Project");
     
     init();
-    initHuman(0.44);
+    initHuman(0.344);
     initShapes();
     
     glutDisplayFunc(display);

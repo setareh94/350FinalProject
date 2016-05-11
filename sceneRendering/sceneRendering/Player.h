@@ -34,7 +34,7 @@ extern double bodyRotate;
 //
 //	variable declarations
 //
-typedef struct
+typedef struct Limb
 {
     GLfloat xLimbRot;	// + is swinging forward at shoulder	[right]
     GLfloat yLimbRot;	// - is opening Limbs at shoulder.		[right]
@@ -129,76 +129,76 @@ void animatePlayer(HumanBody human,HumanMovement movement, uint32_t elapsedTimeM
 
 
 
-
-static inline double * getFrontOfHumanEye(HumanMovement movement)
-{
-    frontOfHumanEye[0] = cos(movement.verticalAngle) *
-    cos(movement.horizontalAngle);
-    frontOfHumanEye[1] = sin(movement.verticalAngle);
-    frontOfHumanEye[2] = cos(movement.verticalAngle) *
-    sin(movement.horizontalAngle);
-    return frontOfHumanEye;
-};
-
-
-static inline double * getCameraShot()
-{
-    return cameraShot;
-}
-static inline double * setCameraShot(HumanMovement movement, HumanBody human)
-{
-    cameraShot[0] = cos(movement.verticalAngle - 10) *
-    cos(movement.horizontalAngle  );
-    cameraShot[1] = sin(movement.verticalAngle - 10);
-    cameraShot[2] = cos(movement.verticalAngle - 10) *
-    sin(movement.horizontalAngle  );
-    return cameraShot;
-};
-
-static inline double * setAboveHumanEye(HumanMovement movement)
-{
-    aboveHumanEye[0] = cos(movement.verticalAngle + 90) *
-    cos(movement.horizontalAngle);
-    aboveHumanEye[1] = sin(movement.verticalAngle + 90);
-    aboveHumanEye[2] = 0;
-    return aboveHumanEye;
-};
-
-static inline double * setRightOfHumanEye(HumanMovement movement)
-{
-    rightOfHumanEye[0] = cos(movement.verticalAngle) *
-    cos(movement.horizontalAngle + 90 );
-    rightOfHumanEye[1] = 0;
-    rightOfHumanEye[2] = cos(movement.verticalAngle) *
-    sin(movement.horizontalAngle + 90);
-    return rightOfHumanEye;
-};
-
-
-//Keeps the person on the ground
-static inline double * setFrontOfHuman(HumanMovement movement)
-{
-    frontOfHuman[0] = cos(movement.horizontalAngle);
-    frontOfHuman[1] = 0;
-    frontOfHuman[2] = sin(movement.horizontalAngle);
-    return frontOfHuman;
-};
-
-static inline double * setAboveHuman(HumanMovement movement)
-{
-    aboveHuman[0] = 0; //Cos(movement.verticalAngle + 90);
-    aboveHuman[1] = 1; //Sin(movement.verticalAngle + 90);
-    aboveHuman[2] = 0;
-    return aboveHuman;
-};
-
-static inline double * setRightOfHuman(HumanMovement movement)
-{
-    rightOfHuman[0] = cos(movement.horizontalAngle + 90 );
-    rightOfHuman[1] = 0;
-    rightOfHuman[2] = sin(movement.horizontalAngle + 90);
-    return rightOfHuman;
-};
+//
+//static inline double * getFrontOfHumanEye(HumanMovement movement)
+//{
+//    frontOfHumanEye[0] = cos(movement.verticalAngle) *
+//    cos(movement.horizontalAngle);
+//    frontOfHumanEye[1] = sin(movement.verticalAngle);
+//    frontOfHumanEye[2] = cos(movement.verticalAngle) *
+//    sin(movement.horizontalAngle);
+//    return frontOfHumanEye;
+//};
+//
+//
+//static inline double * getCameraShot()
+//{
+//    return cameraShot;
+//}
+//static inline double * setCameraShot(HumanMovement movement, HumanBody human)
+//{
+//    cameraShot[0] = cos(movement.verticalAngle - 10) *
+//    cos(movement.horizontalAngle  );
+//    cameraShot[1] = sin(movement.verticalAngle - 10);
+//    cameraShot[2] = cos(movement.verticalAngle - 10) *
+//    sin(movement.horizontalAngle  );
+//    return cameraShot;
+//};
+//
+//static inline double * setAboveHumanEye(HumanMovement movement)
+//{
+//    aboveHumanEye[0] = cos(movement.verticalAngle + 90) *
+//    cos(movement.horizontalAngle);
+//    aboveHumanEye[1] = sin(movement.verticalAngle + 90);
+//    aboveHumanEye[2] = 0;
+//    return aboveHumanEye;
+//};
+//
+//static inline double * setRightOfHumanEye(HumanMovement movement)
+//{
+//    rightOfHumanEye[0] = cos(movement.verticalAngle) *
+//    cos(movement.horizontalAngle + 90 );
+//    rightOfHumanEye[1] = 0;
+//    rightOfHumanEye[2] = cos(movement.verticalAngle) *
+//    sin(movement.horizontalAngle + 90);
+//    return rightOfHumanEye;
+//};
+//
+//
+////Keeps the person on the ground
+//static inline double * setFrontOfHuman(HumanMovement movement)
+//{
+//    frontOfHuman[0] = cos(movement.horizontalAngle);
+//    frontOfHuman[1] = 0;
+//    frontOfHuman[2] = sin(movement.horizontalAngle);
+//    return frontOfHuman;
+//};
+//
+//static inline double * setAboveHuman(HumanMovement movement)
+//{
+//    aboveHuman[0] = 0; //Cos(movement.verticalAngle + 90);
+//    aboveHuman[1] = 1; //Sin(movement.verticalAngle + 90);
+//    aboveHuman[2] = 0;
+//    return aboveHuman;
+//};
+//
+//static inline double * setRightOfHuman(HumanMovement movement)
+//{
+//    rightOfHuman[0] = cos(movement.horizontalAngle + 90 );
+//    rightOfHuman[1] = 0;
+//    rightOfHuman[2] = sin(movement.horizontalAngle + 90);
+//    return rightOfHuman;
+//};
 
 
 void translate(double xAmmount, double yAmmount, double zAmmount);

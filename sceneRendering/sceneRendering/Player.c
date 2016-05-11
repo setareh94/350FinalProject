@@ -51,6 +51,57 @@ double animationScaleRotate = 0;
 const double ANIMATION_MAX = 20;
 
 
+void initLimb(Limb limb, double length)
+{
+    limb.xLimbRot	= 20;// results in no movement...
+    limb.yLimbRot	= 0
+    ;
+    limb.zLimbRot	= 0;
+    limb.xElbowRot	= 1; // Cannot start w/ all joint angles at 0;
+    limb.length = length;
+}
+
+
+HumanBody HumanInit(double height)
+{
+    
+    //    HumanBody *hum = malloc(sizeof(HumanBody));
+    HumanBody hum;
+    initLimb(hum.leftArm, 40);
+    initLimb(hum.rightArm, 40);
+    initLimb(hum.leftLeg, 60);
+    initLimb(hum.rightLeg, 60);
+    hum.wholeBodyRotate = 0;
+    hum.xHipRot	= 0;
+    hum.xKneeRot	= 0;
+    hum.xAnkleRot	= 0;
+    hum.xToeRot	= 0;
+    hum.xNeckRot	= 0;
+    hum.yNeckRot	= 0;
+    hum.xBackRot	= 0;
+    hum.yBackRot	= 0;
+    hum.zBackRot	= 0;
+    hum.JointRad	= 3;
+    hum.BoneRad	= 2;
+    hum.rHead		= 20;
+    hum.wPelvis	= 20;
+    hum.lSpine		= 40;
+    hum.wBack		= 40;
+    hum.lFoot		= 10;
+    hum.faces		= 5; // low res polygons for speed
+    
+    hum.height = height;
+    hum.scalingFactor
+    = height/((hum.lSpine + hum.rightLeg.length));
+    printf("scaling factor %f\n", hum.scalingFactor);
+    
+    hum.obj		= gluNewQuadric(); // new var for quadric object.
+    
+    
+    return hum;
+    
+}
+
 void animateArm(HumanBody human, HumanMovement movement, Limb arm, double position)
 {
     double animationScaleTotal = 	sqrt(pow(animationScaleForawrd/ANIMATION_MAX, 2) +
@@ -168,7 +219,7 @@ void animatePlayer(HumanBody human, HumanMovement movement, uint32_t elapsedTime
     animateLeg(human, movement, human.rightLeg, angle, 1);
     animateLeg(human, movement, human.leftLeg, -angle, -1);
     CheckRestrictions(human);
-    movePlayer(movement, elapsedTimeMS);
+//    movePlayer(movement, elapsedTimeMS);
 }
 
 void movePositionArray(double * positionArray,
@@ -193,67 +244,67 @@ double dmod(double input, double mod)
     return input;
 }
 
-void movePlayer(HumanMovement movement, uint32_t elapsedTimeMS)
-{
-    int moved = 0;
-    //
-    double rotationRate = 90.0; // Deg/Sec
-    double movementRate = 10.0;
-    if(movement.rightRotate != 0)
-    {
-        moved = 1;
-        movement.horizontalAngle
-        -= movement.rightRotate * (rotationRate*elapsedTimeMS/1000.0);
-        movement.horizontalAngle = dmod(movement.horizontalAngle, 360);
-    }
-    if(movement.upRotate != 0)
-    {
-        moved = 1;
-        movement.verticalAngle
-        -= movement.upRotate * (rotationRate*elapsedTimeMS/1000.0);
-        // Make sure we don't look over the top
-        if(movement.verticalAngle < -70)
-        {
-            movement.verticalAngle = -70;
-        }
-        // Make sure we don't look through the ground
-        else if(movement.verticalAngle > 45)
-        {
-            movement.verticalAngle = 45;
-        }
-    }
-    
-    if(movement.rightMovement != 0)
-    {
-        moved = 1;
-        double * rightMovement = setRightOfHuman(movement);
-        movePositionArray(movement.position,
-                          rightMovement,
-                          movementRate * animationScaleRight/ANIMATION_MAX,
-                          elapsedTimeMS);
-        
-    }
-    
-    if(animationScaleForawrd != 0)
-    {
-        moved = 1;
-        double * forwardMovement = setFrontOfHuman(movement);
-        movePositionArray(movement.position,
-                          forwardMovement,
-                          movementRate * animationScaleForawrd/ANIMATION_MAX,
-                          elapsedTimeMS);
-    }
-    
-    if(movement.jumpMovement != 0)
-    {
-        moved = 1;
-        double * upMovement = setAboveHuman(movement);
-        movePositionArray(movement.position,
-                          upMovement,
-                          movementRate * movement.jumpMovement,
-                          elapsedTimeMS);
-    }
-}
+//void movePlayer(HumanMovement movement, uint32_t elapsedTimeMS)
+//{
+//    int moved = 0;
+//    //
+//    double rotationRate = 90.0; // Deg/Sec
+//    double movementRate = 10.0;
+//    if(movement.rightRotate != 0)
+//    {
+//        moved = 1;
+//        movement.horizontalAngle
+//        -= movement.rightRotate * (rotationRate*elapsedTimeMS/1000.0);
+//        movement.horizontalAngle = dmod(movement.horizontalAngle, 360);
+//    }
+//    if(movement.upRotate != 0)
+//    {
+//        moved = 1;
+//        movement.verticalAngle
+//        -= movement.upRotate * (rotationRate*elapsedTimeMS/1000.0);
+//        // Make sure we don't look over the top
+//        if(movement.verticalAngle < -70)
+//        {
+//            movement.verticalAngle = -70;
+//        }
+//        // Make sure we don't look through the ground
+//        else if(movement.verticalAngle > 45)
+//        {
+//            movement.verticalAngle = 45;
+//        }
+//    }
+//    
+//    if(movement.rightMovement != 0)
+//    {
+//        moved = 1;
+//        double * rightMovement = setRightOfHuman(movement);
+//        movePositionArray(movement.position,
+//                          rightMovement,
+//                          movementRate * animationScaleRight/ANIMATION_MAX,
+//                          elapsedTimeMS);
+//        
+//    }
+//    
+//    if(animationScaleForawrd != 0)
+//    {
+//        moved = 1;
+//        double * forwardMovement = setFrontOfHuman(movement);
+//        movePositionArray(movement.position,
+//                          forwardMovement,
+//                          movementRate * animationScaleForawrd/ANIMATION_MAX,
+//                          elapsedTimeMS);
+//    }
+//    
+//    if(movement.jumpMovement != 0)
+//    {
+//        moved = 1;
+//        double * upMovement = setAboveHuman(movement);
+//        movePositionArray(movement.position,
+//                          upMovement,
+//                          movementRate * movement.jumpMovement,
+//                          elapsedTimeMS);
+//    }
+//}
 
 void drawPlayer(HumanBody human,HumanMovement movement)
 {
@@ -405,7 +456,7 @@ void drawHand(HumanBody H)
 {
     glPushMatrix();
     glColor3f(1,1,1);
-    //    baller(0, 0, 0, 3, NULL);
+        ball(0, 0, 0, 3, NULL);
     glPopMatrix();
 }
 
@@ -422,14 +473,14 @@ void drawFoot(HumanBody H)
     glPopMatrix();
 }
 
-void modelLimb(Limb limb, HumanBody H, void (*drawEnd)(HumanBody), Side side)
+void modelLimb(Limb limb, HumanBody H, Side side)
 {
     glPushMatrix();
     glRotatef(limb.yLimbRot, 0.0f, 0.0f, 1.0f);
     glRotatef(limb.xLimbRot, -1.0f, 0.0f, 0.0f);
     // shoulder joint
     double zLimbRot;
-    if(side == left)
+    if(side == right)
         
         
         
@@ -442,16 +493,15 @@ void modelLimb(Limb limb, HumanBody H, void (*drawEnd)(HumanBody), Side side)
     }
     glRotatef(zLimbRot, 0.0f, 1.0f, 0.0f);
     glColor3fv(humanColor);
-    gluCylinder(H.obj, H.BoneRad, H.BoneRad, limb.length/2, H.faces, H.faces);
+    gluCylinder(H.obj, H.BoneRad, H.BoneRad, 40/2, H.faces, H.faces);
     glColor3fv(humanColor);
     gluSphere(H.obj, H.JointRad, H.faces, H.faces);
     glTranslatef(0.0, 0.0, limb.length/2);
     glRotatef(limb.xElbowRot, -1.0, 0.0, 0.0);						// elbow joint
     
-    gluCylinder(H.obj, H.BoneRad, H.BoneRad, limb.length/2, H.faces, H.faces);
+    gluCylinder(H.obj, H.BoneRad, H.BoneRad, 40/2, H.faces, H.faces);
     glPushMatrix();
     glTranslated(0,0,limb.length/2);
-    (*drawEnd)(H);
     glPopMatrix();
     glColor3fv(humanColor);
     gluSphere(H.obj, H.JointRad, H.faces, H.faces);
@@ -469,7 +519,7 @@ void modelLeg(Limb limb, HumanBody H, Side side)
     glTranslated(0, limb.length, 0);
     glRotatef(90, 1.0, 0.0, 0.0);
     
-    modelLimb(limb, H, drawFoot, side);
+    modelLimb(limb, H, side);
     
     glTranslatef(0.0f, 0.0f, limb.length);
     glRotatef(H.xHipRot, -1.0f, 0.0f, 0.0f);						// hip joint
@@ -547,8 +597,8 @@ void ModelBody(HumanBody H)
     // left leg
     glPushMatrix();
     glTranslatef(H.wPelvis/2, 0, 0);
-    modelLeg(H.leftLeg, H, left);
-    glPopMatrix();									// undo hip displacement from toe movement
+//    modelLeg(H.leftLeg, H, left);
+//    glPopMatrix();									// undo hip displacement from toe movement
     // end left leg
     
     // right leg
@@ -556,28 +606,30 @@ void ModelBody(HumanBody H)
     glTranslatef(-H.wPelvis/2
                  
                  , 0, 0);
-    modelLeg(H.rightLeg, H, right);
-    glPopMatrix();
+//    modelLeg(H.rightLeg, H, right);
+//    glPopMatrix();
     // end right leg
     
-    ModelTorso(H);
+//    ModelTorso(H);
     
-    modelHeadAndNeck(H);
+//    modelHeadAndNeck(H);
     
     
     // shoulders and back
-    glPushMatrix();
-    glRotatef(90.0f, 0.0f, 1.0, 0.0f);
-    glTranslatef(0.0f, 0.0f, -H.wBack/2);
-    gluCylinder(H.obj, H.BoneRad, H.BoneRad, H.wBack, 10, 10);
-    glPopMatrix();
+//    glPushMatrix();
+//    glRotatef(90.0f, 0.0f, 1.0, 0.0f);
+//    glTranslatef(0.0f, 0.0f, -H.wBack/2);
+//    gluCylinder(gluNewQuadric(), 2, 2, H.wBack, 10, 10);
+//    glPopMatrix();
     // end shoulders and back
     
     // right arm
     glPushMatrix();
     glRotatef(90, 1.0, 0.0, 0.0);
     glTranslatef(-H.wBack/2, 0.0, 0.0);
-    modelLimb(H.rightArm, H, drawHand, right);
+//    gluCylinder(gluNewQuadric(), 4, 2, H.wBack, 10, 10);
+
+    modelLimb(H.rightArm, H, right);
     glPopMatrix();
     // end right arm
     
@@ -585,63 +637,15 @@ void ModelBody(HumanBody H)
     glPushMatrix();
     glRotatef(90, 1.0, 0.0, 0.0);
     glTranslatef(H.wBack/2, 0.0, 0.0);
-    modelLimb(H.leftArm, H, drawHand, left);
+    modelLimb(H.leftArm, H, left);
     glPopMatrix();
     // end left arm
     
     glPopMatrix(); // end model
-}
-
-void initLimb(Limb limb, double length)
-{
-    limb.xLimbRot	= 0;// results in no movement...
-    limb.yLimbRot	= 0
-    ;
-    limb.zLimbRot	= 0;
-    limb.xElbowRot	= 1; // Cannot start w/ all joint angles at 0;
-    limb.length = length;
+    
 }
 
 
-HumanBody HumanInit(double height)
-{
-    
-    //    HumanBody *hum = malloc(sizeof(HumanBody));
-    HumanBody hum;
-    initLimb(hum.leftArm, 40);
-    initLimb(hum.rightArm, 40);
-    initLimb(hum.leftLeg, 60);
-    initLimb(hum.rightLeg, 60);
-    hum.wholeBodyRotate = 0;
-    hum.xHipRot	= 0;
-    hum.xKneeRot	= 0;
-    hum.xAnkleRot	= 0;
-    hum.xToeRot	= 0;
-    hum.xNeckRot	= 0;
-    hum.yNeckRot	= 0;
-    hum.xBackRot	= 0;
-    hum.yBackRot	= 0;
-    hum.zBackRot	= 0;
-    hum.JointRad	= 3;
-    hum.BoneRad	= 2;
-    hum.rHead		= 20;
-    hum.wPelvis	= 20;
-    hum.lSpine		= 40;
-    hum.wBack		= 40;
-    hum.lFoot		= 10;
-    hum.faces		= 5; // low res polygons for speed
-    
-    hum.height = height;
-    hum.scalingFactor
-    = height/((hum.lSpine + hum.rightLeg.length));
-    printf("scaling factor %f\n", hum.scalingFactor);
-    
-    hum.obj		= gluNewQuadric(); // new var for quadric object.
-    
-    
-    return hum;
-    
-}
 
 
 
