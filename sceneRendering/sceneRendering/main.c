@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include "Lighting.h"
 #include "Player.h"
-
+#include "Robot.h"
 #define ourImageWidth 256
 #define ourImageHeight 256
 #define PI 3.1415
@@ -219,7 +219,7 @@ void init(void)
     glViewport(0, 0, w, h);
     
     // Set the correct perspective.
-    gluPerspective(60.0, w/h, 0.1, 100.0);
+    gluPerspective(40, w/h, 0.1, 100.0);
     
     // Get Back to the Modelview
     glMatrixMode(GL_MODELVIEW);
@@ -545,7 +545,8 @@ void house()
 //}
 void Scene(int light)
 {    Light(light);
-     drawPlayer(human, humanMovement);
+//     drawPlayer(human, humanMovement);
+
 }
 void displayLight()
 {
@@ -561,7 +562,7 @@ void switchAxisToXYZ()
 {
     glRotated(90,0,1,0);
     glRotated(90,1,0,0);
-    glScaled(1,1,-1);
+    glScaled(0.5,0.5,0.5);
 }
 
 void displayPlayerViewport()
@@ -577,10 +578,18 @@ void displayPlayerViewport()
     
     double color2[3] = {0,1,1};
     ball(10, 0, 1, .1, color2);
-    glPushMatrix();
+//    glPushMatrix();
     glTranslated(1,0,0);
     Scene(1);
-//    drawPlayer(human, humanMovement);
+
+    glPushMatrix();
+    glPopMatrix();
+    glPushMatrix();
+//    glScaled(0.25,0.25,0.25);
+    glRotated(90, 0.0, 0.0, 1.0);
+    drawRobot();
+    glPopMatrix();
+//  drawPlayer(human, humanMovement);
     glScalef(0.5, 0.5, 0.5);
     glPopMatrix();
     glPopMatrix();
@@ -733,6 +742,9 @@ void display(){
             glPopMatrix();
         }
     
+//    drawRobot();
+
+    
     //Draw Different Trees
     tree(-3.0,0.05f,8.0 ,0.8,0.5,0.8, 30, 1.9f,0.2f,2.0f,1.0f, 1);
     tree(6,0,1.5 ,0.5,0.5,0.5, 0, 1.0f,0.3f,4.0f,1.0f, 2);
@@ -769,6 +781,8 @@ void mouse(int btn, int state, int x, int y)
         v0 = 6.0;
         degree = PI/4.0;
         hit = false;
+
+        throwBall(200);
     }
 }
 
@@ -791,6 +805,7 @@ void keyboard(unsigned char key, int x, int z)
         eye[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         humanMovement.forwardMovement = 1;
+        moveTight(5, 1);
 
     }
     if (key == '-' && key>1)
@@ -803,6 +818,8 @@ void keyboard(unsigned char key, int x, int z)
         at[0] += step*sin(-theta - (PI/2.0))*walkSpeed;
         eye[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
+        moveTight(1, 5);
+
     }
     
     else if((key == 'a') || (key == 'A')) {
