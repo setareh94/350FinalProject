@@ -235,33 +235,13 @@ void drawFrame()
 {
     glColor3f(1.0f,0.0f,0.0f);
     
-    /********************************
-     *   First draw the all the items
-     *   at the center of the frame.
-     *   Draw the bigger gear,the small
-     *   cylinder acting as the socket
-     *   for the pedals.Also DON'T
-     *   forget to draw the two
-     *   connecting cemtral rods
-     *********************************/
     glPushMatrix();
-    /******************************
-     *   Allow me to draw the BIGGER
-     *   gear and the socket cylinder
-     *******************************/
+
     glPushMatrix();
-    /***************************
-     *   Let the gear have the
-     *   green color
-     ***************************/
+
     glColor3f(0.0f,1.0f,0.0f);
     
-    /**************************
-     *   The gear should be
-     *   outside the frame !!!
-     *   This is the bigger
-     *   GEAR
-     ***************************/
+
     glPushMatrix();
     glTranslatef(0.0f,0.0f,0.06f);
     glRotatef(-2*pedalAngle,0.0f,0.0f,1.0f);
@@ -275,10 +255,7 @@ void drawFrame()
     glTranslatef(0.0f,0.0f,-0.2f);
     ZCylinder(0.08f,0.32f);
     glPopMatrix();
-    /*****************************
-     *   Lets first draw the
-     *   rightmost rod of the frame
-     *******************************/
+
     glRotatef(RIGHT_ANGLE,0.0f,0.0f,1.0f);
     XCylinder(ROD_RADIUS,RIGHT_ROD);
     
@@ -289,11 +266,7 @@ void drawFrame()
      *********************************/
     glRotatef(MIDDLE_ANGLE-RIGHT_ANGLE,0.0f,0.0f,1.0f);
     XCylinder(ROD_RADIUS,MIDDLE_ROD);
-    /********************************
-     *   We have drawn the support.So
-     *   let's draw the seat with a
-     *   new color
-     *********************************/
+
     glColor3f(1.0f,1.0f,0.0f);
     glTranslatef(MIDDLE_ROD,0.0f,0.0f);
     glRotatef(-MIDDLE_ANGLE,0.0f,0.0f,1.0f);
@@ -422,9 +395,7 @@ void drawFrame()
     
 
     glPushMatrix();
-    /****************************
-     *   Draw the main big rod
-     ****************************/
+
     XCylinder(ROD_RADIUS,CRANK_ROD);
     
 
@@ -440,10 +411,7 @@ void drawFrame()
     glTranslatef(0.0f,0.0f,-WHEEL_OFFSET);
     XCylinder(ROD_RADIUS,CRANK_RODS);
     glPopMatrix();
-    /********************************
-     *   Why not draw the wheel.
-     *   The FRONT wheel to be precise
-     *********************************/
+
     glTranslatef(CRANK_RODS,0.0f,0.0f);
     glRotatef(-2*pedalAngle,0.0f,0.0f,1.0f);
     drawTyre();
