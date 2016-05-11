@@ -83,7 +83,6 @@ void drawTrunk()
 {
     glPushMatrix();
     
-    //tronco
     glColor3ubv(v_colors[2]);
     glScalef(1.2, 1.7, 0.5);
     glutSolidCube(1);
@@ -95,7 +94,6 @@ void drawForeArm()
 {
     glPushMatrix();
     
-    //antebraço
     glColor3ubv(v_colors[2]);
     glTranslatef(0.0, -0.55, 0.0);
     glPushMatrix();
@@ -110,7 +108,6 @@ void drawArm()
 {
     glPushMatrix();
     
-    //braço
     glColor3ubv(v_colors[2]);
     glRotatef(-30.0, 1.0, 0.0, 0.0);
     glTranslatef(0.0, -0.55, 0.0);
@@ -119,7 +116,6 @@ void drawArm()
     glutSolidCube(1);
     glPopMatrix();
     
-    //dedos
     glColor3ubv(v_colors[6]);
     glTranslatef(0.0, -0.5, 0.0);
     glScalef(0.15, 0.25, 0.15);
@@ -135,7 +131,6 @@ void drawLeftArm()
     
     glPushMatrix();
     
-    //ombro
     drawKnuckle();
     
     glRotatef(a_larm[0], a_larm[2], 0, 0);
@@ -143,7 +138,6 @@ void drawLeftArm()
     
     drawForeArm();
     
-    //cotovelo
     glTranslatef(0.0, -1.1, 0.0);
     drawKnuckle();
     
@@ -161,7 +155,6 @@ void drawRightArm()
     
     glPushMatrix();
     
-    //ombro
     drawKnuckle();
     
     glRotatef(a_rarm[0], a_rarm[2], 0, 0);
@@ -169,7 +162,6 @@ void drawRightArm()
     
     drawForeArm();
     
-    //cotovelo
     glTranslatef(0.0, -1.1, 0.0);
     drawKnuckle();
     
@@ -184,7 +176,6 @@ void drawThigh()
 {
     glPushMatrix();
     
-    //coxa
     glColor3ubv(v_colors[2]);
     glTranslatef(0.0, -0.65, 0.0);
     glPushMatrix();
@@ -241,14 +232,12 @@ void drawRightLeg()
     
     glPushMatrix();
     
-    //antecoxa
     drawKnuckle();
     
     glRotatef(a_rleg[0], a_rleg[1], 0, 0);
     
     drawThigh();
     
-    //joelho
     glTranslatef(0.0, -1.3, 0.0);
     drawKnuckle();
     
