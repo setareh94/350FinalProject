@@ -543,6 +543,7 @@ void house()
 ////    ExtractFrustum();
 //    //   ErrCheck("end setView");
 //}
+
 void Scene(int light)
 {    Light(light);
 //     drawPlayer(human, humanMovement);
@@ -628,8 +629,9 @@ void idle()
             ballPos[1] = v0*t*sin(degree)-4.9*t*t+y_start;
         }
         else
-            ball_timer = 10000;
-            
+            // Some line here needed to lower the robot's hand
+            //throwBall(-100);
+        
         //Increment time variable
         ball_timer++;
     }
@@ -760,7 +762,6 @@ void display(){
         }
     
     glutSwapBuffers();
-    
 }
 
 /* 
