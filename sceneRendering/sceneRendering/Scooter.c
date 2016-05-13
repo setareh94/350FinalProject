@@ -427,7 +427,6 @@ void displayBike(){
     drawFrame();
     glPopMatrix();
     
-    glPopMatrix();
-    
+    //glPopMatrix();
 }
 

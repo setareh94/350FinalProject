@@ -166,7 +166,7 @@ uint64_t previousTime;
 void animatePerson(uint32_t currentTime)
 {
     //  Elapsed time in seconds
-    humanMovement.currentTime = currentTime;
+   // humanMovement.currentTime = currentTime;
     frames++;
     if(frames == 100)
     {
@@ -324,7 +324,6 @@ void sun(){
     glTranslatef(0.5,5.7,-8.5);
     glutSolidSphere(0.8,30,30);
     glPopMatrix();
-    glFlush();
 }
 
 // Texture the ground
@@ -586,12 +585,15 @@ void displayPlayerViewport()
     glPushMatrix();
     glPopMatrix();
     glPushMatrix();
-//    glScaled(0.25,0.25,0.25);
+    glScaled(3.0,3.0,3.0);
     glRotated(90, 0.0, 0.0, 1.0);
+    glRotatef(10, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, -1.5, 0.53);
+    glRotatef(phi*180.0/PI, 1.0, 0.0, 0.0);
+    glTranslatef(0.0, -sin(phi), -sin(phi));
     drawRobot();
     glPopMatrix();
 //  drawPlayer(human, humanMovement);
-    glScalef(0.5, 0.5, 0.5);
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
@@ -628,9 +630,6 @@ void idle()
         
             ballPos[1] = v0*t*sin(degree)-4.9*t*t+y_start;
         }
-        else
-            // Some line here needed to lower the robot's hand
-            //throwBall(-100);
         
         //Increment time variable
         ball_timer++;
@@ -694,6 +693,7 @@ void initShapes()
 void display(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.6,0.6,1.0,1.0);
+    
     // Reset transformations
     glLoadIdentity();
     
@@ -702,6 +702,8 @@ void display(){
     
     glColor3f(1.0, 1.0, 1.0);
     
+    glPushMatrix();
+
     //Draw the scene
     texGround();
     cloud();
@@ -712,7 +714,7 @@ void display(){
     // If bike is activated, rotate and translate accordingly (don't draw person)
     if(bike) {
         roty = -theta;
-        glTranslatef(eye[0]+9.0, 0.1, eye[2]-1.0);
+        glTranslatef(eye[0]+9.0, 0.4, eye[2]-1.0);
     }
     // Otherwise just translate it to where it was left last and draw person
     else {
@@ -722,7 +724,7 @@ void display(){
     // Draw bike
     glTranslatef(-9.0, 0.0, 1.0);
     glRotatef(roty*180/PI, 0.0, 1.0, 0.0);
-    glTranslatef(9.0, 0.0, -1.0);
+    glTranslatef(9.0, -0.3, -1.0);
     displayBike();
     glPopMatrix();
     
@@ -760,6 +762,7 @@ void display(){
             tree(-2.5f,0,-2.0f ,0.5,0.5,0.5, 0, 0.3f,0.3f,3.0f,1.0f,4);
             glPopMatrix();
         }
+    glPopMatrix();
     
     glutSwapBuffers();
 }
@@ -840,7 +843,7 @@ void keyboard(unsigned char key, int x, int z)
     }
 
     else if(key == 32) {
-        if(!bike && fabs(eye[0]+9.0-transx)<2.0 && fabs(eye[2]-1.0-transz)<2.0) {
+        if(!bike && fabs(eye[0]+9.0-transx)<4.0 && fabs(eye[2]-1.0-transz)<4.0) {
             walkSpeed = 3.0f;
             bike = true;
         }
@@ -889,7 +892,7 @@ void special(int key, int x, int y)
     
     // Recalculate at values
     at[0] = eye[0] + cos(theta);
-    at[1] = eye[1] + -sin(phi);
+    at[1] = eye[1] - sin(phi);
     at[2] = eye[2] + cos(phi)*sin(theta);
 }
 
@@ -933,8 +936,8 @@ int main(int argc, char *argv[])
     glutCreateWindow("Final Project");
     
     init();
-    initHuman(0.344);
-    initShapes();
+    //initHuman(0.344);
+    //initShapes();
     
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
