@@ -26,11 +26,15 @@
 #include "Lighting.h"
 #include "Player.h"
 #include "Robot.h"
+
 #define ourImageWidth 256
 #define ourImageHeight 256
 #define PI 3.1415
 
 float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
+
+//mouse coordinates for looking around
+float oldX, oldY;
 
 // Variables for throwing the balls
 float rotation=3*PI/2.0;
@@ -598,6 +602,7 @@ void displayPlayerViewport()
     glPopMatrix();
     glPopMatrix();
 }
+
 /* Idle function for animations */
 void idle()
 {
@@ -631,7 +636,7 @@ void idle()
             ballPos[1] = v0*t*sin(degree)-4.9*t*t+y_start;
         }
         
-        //Increment time variable
+        //increment time variable
         ball_timer++;
     }
     
@@ -659,7 +664,7 @@ void idle()
         down = false;
     }
     
-    //aNIMATE PERSON
+    //animate person
     uint32_t currentTime = glutGet(GLUT_ELAPSED_TIME);
     
     animatePerson(currentTime);
@@ -687,7 +692,6 @@ void initShapes()
     printf("init shapes\n");
     initSquare();
     printf("done initing shapes\n");
-    //
 }
 
 void display(){
@@ -773,6 +777,7 @@ void display(){
  */
 void mouse(int btn, int state, int x, int y)
 {
+    //for ball throwing
     if(btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         ball_timer = 0;
         ballPos[0] = eye[0];
@@ -812,10 +817,12 @@ void keyboard(unsigned char key, int x, int z)
         moveTight(5, 1);
 
     }
-    if (key == '-' && key>1)
+    
+    else if(key == '-' && key>1)
         fov--;
-    if (key == '+' && key<179)
+    else if(key == '+' && key<179)
         fov++;
+    
     else if((key == 's') || (key == 'S')) {
         
         eye[0] += step*sin(-theta - (PI/2.0))*walkSpeed;
@@ -867,7 +874,42 @@ void keyboard(unsigned char key, int x, int z)
     glutPostRedisplay();
 }
 
-/* 
+/*
+ Motion function
+ captures mouse movement and allows user to look around scene
+ */
+void motion(int x, int y) {
+    //makes cursor invisible
+    glutSetCursor(GLUT_CURSOR_NONE);
+    
+    //calculate difference and move camera
+    if((oldX - x) < 0) {    //mouse moved to right
+        theta += step/2.0;
+    }
+    else if((oldX - x) > 0) {   //mouse moved to left
+        theta -= step/2.0;
+    }
+    if((oldY - y) < 0) {    //mouse moved up
+        phi -= .01;
+    }
+    else if((oldY - y) > 0) {   //mouse moved down
+        phi += .01;
+    }
+    
+    // Recalculate at values
+    at[0] = eye[0] + cos(theta);
+    at[1] = eye[1] - sin(phi);
+    at[2] = eye[2] + cos(phi)*sin(theta);
+    
+    //move mouse to center of window
+    glutWarpPointer(w/2, h/2);
+
+    //save old mouse coords
+    oldX = x;
+    oldY = y;
+}
+
+/*
  Arrow Key Function
  Controls the at[] vector and directs where the user looks
  */
@@ -946,6 +988,7 @@ int main(int argc, char *argv[])
     glutSpecialFunc(special);
     glutIdleFunc(idle);
     glutReshapeFunc(reshape);
+    glutPassiveMotionFunc(motion);
     glEnable(GL_DEPTH_TEST);
     
     
