@@ -6,9 +6,14 @@
  *
  *  This assignment is the culmination of everything we learned this semester
  *
- *  Usage:      //FILL IN USAGE//
+ *  Usage:      The usage will be outlined in detail during the presentation of the project
+ *              at turn in. However, one can walk around the scene using W, A, S, D, can jump using 
+ *              the return key. Can mount the bike when within a proper distance using the space bar,
+ *              can throw a ball using the mouse click and can look around using the mouse.
  *
- *  Overview:   //FILL IN OVERVIEW//
+ *  Overview:   The purpose of this assignment is to demonstrate knowledge in areas like texturing, 
+ *              lighting, robot movement, parametric curves (ball throwing) in 3D, and other useful 
+ *              OpenGL concepts.
  *
  */
 
@@ -24,11 +29,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "Lighting.h"
-#include "Player.h"
 #include "Robot.h"
 
-#define ourImageWidth 256
-#define ourImageHeight 256
 #define PI 3.1415
 
 float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
@@ -41,6 +43,10 @@ float rotation=3*PI/2.0;
 float prev_xz = 0.0;
 float y_start, v0, degree;
 int bounce_count = 0;
+//ball posiiton
+float ballPos[3]={-10.0f, -10.0f, -10.0f};
+//ball movmement counter (see idle)
+int ball_timer = 100001;
 
 float m=0.0;    //movement of clouds
 
@@ -49,14 +55,6 @@ float w = 800, h = 600; // Width and Height of the window
 //for gluLookAt function
 float eye[3] = {1.5f, 1.0f, 14.0f}; //eye vector
 float at[3] = {0.0f, 1.0f, -1.0f};  //at vector
-
-//ball posiiton
-float ballPos[3]={-10.0f, -10.0f, -10.0f};
-//ball movmement counter (see idle)
-int ball_timer = 100001;
-float ball_speed = 0.005;
-
-float angle = 0.0f; // angle for rotating triangle
 
 //double eyeIdealPosition[3] = {-10, 10, -10};
 double eyePosition[3];
@@ -68,28 +66,12 @@ float transx=0.0, transz=0.0;   // for translating the bike
 
 bool bike = false, extremes = false, hit=false, jump=false, down=false;
 
-int th=0;         //  Azimuth of view angle
-int ph=10;         //  Elevation of view angle
-int fov=50;       //  Field of view (for perspective)
-double asp=1;     //  Aspect ratio
-double dim=24.0;   //  Size of world
 const int BufferSize = 10;
 
 GLuint BufferName[BufferSize];
-float zoom = 1; // incremetation base for zoom level
-
-HumanBody human;
-HumanMovement humanMovement;
 
 unsigned int texture;
 char filename[200];
-
-enum View
-{
-    //eye,
-    projection,
-    orthoginal
-};
 
 enum
 {
@@ -102,41 +84,6 @@ enum
     SQUARE_VERTEX = 6,
     
 };
-
-// I don't think we need this
-/*void moveCamera()
-{
-    double * cameraOffset = setCameraShot(humanMovement, human);
-    
-    //Eye behind human
-    eyePosition[0] = - human.height*2*cameraOffset[0]; //humanMovement.position[0] - human->height*2*cameraOffset[0];
-    eyePosition[1] = - human.height*2*cameraOffset[1] + human.height * .1;
-    //humanMovement.position[1] - human->height*2*cameraOffset[1] + human->height * .1;
-    eyePosition[2] = - human.height*2*cameraOffset[2] - human.height * .1; //humanMovement.position[2] - human->height*2*cameraOffset[2] - human->height * .1;
-    //Focus on Human
-    eyeFocus[0] = 0;  //humanMovement.position[0];
-    eyeFocus[1] = + human.height * .1; //humanMovement.position[1] + human->height * .1;
-    eyeFocus[2] = - human.height * .1; //humanMovement.position[2] - human->height * .1;
-}*/
-
-void initHuman(double height)
-{
-    human = HumanInit(height);
-    humanMovement.rightMovement = 0;
-    humanMovement.forwardMovement = 0;
-    humanMovement.jumpMovement = 0;
-    humanMovement.rightRotate = 0;
-    humanMovement.currentTime = 0;
-    humanMovement.upRotate = 0;
-    humanMovement.position[0] = 0;  //-10;
-    humanMovement.position[1] = height; //10;
-    humanMovement.position[2] = 0; //-10;
-    humanMovement.verticalAngle = 0;  //-10;
-    humanMovement.horizontalAngle = -180; //45;
-    humanMovement.moving = standing;
-//    setCameraShot(humanMovement, human);
-}
-
 
 GLfloat vertic[][3]={{-1.5,0.0,1.5},{-1.5,0.0,-1.5},{1.5,0.0,-1.5},{1.5,0.0,1.5},   //ground  3
     {0.5,0.0,-0.3},{0.5,0.0,-1.4},{1.4,0.0,-1.4},{1.4,0.0,-0.3},   //house 1 7
@@ -163,23 +110,6 @@ GLfloat vertic[][3]={{-1.5,0.0,1.5},{-1.5,0.0,-1.5},{1.5,0.0,-1.5},{1.5,0.0,1.5}
 
 GLfloat colors[][3]={{1.0,1.0,1.0},{0.0,0.0,0.0},{0.89019,0.38823,0.03921},{0.57254,0.44705,0.01176},{0.88235,0.0,0.03921},{0.00784,0.54509,0.0},
     {0.4588,0.6784,0.2509},{0.88235,0.67843,0.2},{0.35294117,0.3568627,0.3647059},{0.0,0.0,1.0}}; //0.white,1.black,2.orange,3.yellowish,4.red,5.green,6.car,7.orange,8.grey
-uint32_t frames = 0;
-uint32_t lastTime = 0;
-uint64_t previousTime;
-
-void animatePerson(uint32_t currentTime)
-{
-    //  Elapsed time in seconds
-   // humanMovement.currentTime = currentTime;
-    frames++;
-    if(frames == 100)
-    {
-        printf("frames %u seconds %u FPS: %f\n", frames, currentTime,  frames/(currentTime - lastTime)*1000.0);
-        lastTime = currentTime;
-        frames = 0;
-    }
-    animatePlayer(human, humanMovement, currentTime- previousTime);
-}
 
 // Read texture image file
 unsigned int LoadTex(char *s)
@@ -232,6 +162,11 @@ void init(void)
     glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);
     texture = LoadTex(filename);
+    
+    // Set mouse to center
+    glutWarpPointer(w/2, h/2);
+    oldX = w/2;
+    oldY = h/2;
 }
 
 /* Create the scene particals
@@ -504,52 +439,9 @@ void house()
     glPopMatrix();
 }
 
-//void setView(enum View view)
-//{
-//    
-//    if (view == eye)
-//    {
-//        glMatrixMode (GL_PROJECTION);
-//        //  Undo previous transformations
-//        glLoadIdentity();
-//        gluPerspective(fov,asp,dim/32,4*dim);
-//        
-//        //  Switch to manipulating the model matrix
-//        glMatrixMode(GL_MODELVIEW);
-//        //  Undo previous transformations
-//        glLoadIdentity();
-//        
-//        double eyeNormal[3] = {0,1,0};
-//		      
-//        gluLookAt(eyePosition[0], eyePosition[1], eyePosition[2]
-//                  , eyeFocus[0], eyeFocus[1], eyeFocus[2]
-//                  , eyeNormal[0], eyeNormal[1], eyeNormal[2]);
-//    }
-//    //  Orthogonal - set world orientation
-//    else if (view == orthoginal)
-//    {
-//        glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
-//        glRotatef(ph,1,0,0);
-//        glRotatef(th,0,1,0);
-//        glScaled(zoom, zoom, zoom);
-//    }
-//    else if (view == projection)
-//    {
-////        glMatrixMode (GL_PROJECTION);      // Select The Projection Matrix
-////        glLoadIdentity ();                // Reset The Projection Matrix
-////        gluPerspective(fov,asp,dim/64,4*dim);
-////        
-////        glMatrixMode (GL_MODELVIEW);
-////        glLoadIdentity ();                // Reset The Projection Matrix
-//    }
-//    // Sets this for culling
-////    ExtractFrustum();
-//    //   ErrCheck("end setView");
-//}
-
 void Scene(int light)
-{    Light(light);
-//     drawPlayer(human, humanMovement);
+{
+    Light(light);
 
 }
 void displayLight()
@@ -558,7 +450,6 @@ void displayLight()
     glColor3f(1,1,1);
     glPushMatrix();
     glTranslated(Lpos[0],Lpos[1],Lpos[2]);
-    //glutSolidSphere(0.3,10,10);
     glPopMatrix();
 }
 
@@ -571,18 +462,11 @@ void switchAxisToXYZ()
 
 void displayPlayerViewport()
 {
-//    glViewport (0, 0, w, h);
     glPushMatrix();
     glPushMatrix();
     glLoadIdentity();
     switchAxisToXYZ();
     
-    double color1[3] = {0,1,1};
-    ball(10, 1, 0, .1, color1);
-    
-    double color2[3] = {0,1,1};
-    ball(10, 0, 1, .1, color2);
-//    glPushMatrix();
     glTranslated(1,0,0);
     Scene(1);
 
@@ -597,7 +481,6 @@ void displayPlayerViewport()
     glTranslatef(0.0, -sin(phi), -sin(phi));
     drawRobot();
     glPopMatrix();
-//  drawPlayer(human, humanMovement);
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
@@ -664,11 +547,6 @@ void idle()
         down = false;
     }
     
-    //animate person
-    uint32_t currentTime = glutGet(GLUT_ELAPSED_TIME);
-    
-    animatePerson(currentTime);
-    
     //redraw
     glutPostRedisplay();
     
@@ -677,11 +555,9 @@ void idle()
 void initSquare()
 {
     float squareVertex[2*4] = {0,0,0,1,1,1,1,0};
-    printf("Init Square\n");
     glGenBuffers(1, &BufferName[SQUARE_VERTEX]);
     glBindBuffer(GL_ARRAY_BUFFER, BufferName[SQUARE_VERTEX]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2*4, squareVertex, GL_STATIC_DRAW);
-    //  ErrCheck("INIT LEAF VERTEX BUFFER");
     // Reset
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -689,9 +565,7 @@ void initSquare()
 void initShapes()
 {
     /* Allocate and assigns buffers*/
-    printf("init shapes\n");
     initSquare();
-    printf("done initing shapes\n");
 }
 
 void display(){
@@ -750,9 +624,6 @@ void display(){
             glPopMatrix();
         }
     
-//    drawRobot();
-
-    
     //Draw Different Trees
     tree(-3.0,0.05f,8.0 ,0.8,0.5,0.8, 30, 1.9f,0.2f,2.0f,1.0f, 1);
     tree(6,0,1.5 ,0.5,0.5,0.5, 0, 1.0f,0.3f,4.0f,1.0f, 2);
@@ -793,6 +664,8 @@ void mouse(int btn, int state, int x, int y)
 
         throwBall(200);
     }
+    if(btn == GLUT_LEFT_BUTTON && state == GLUT_UP)
+        throwBall(-200);
 }
 
 /* 
@@ -813,15 +686,9 @@ void keyboard(unsigned char key, int x, int z)
         at[0] -= step*sin(-theta - (PI/2.0))*walkSpeed;
         eye[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
-        humanMovement.forwardMovement = 1;
-        moveTight(5, 1);
+        moveTight(8, 1);
 
     }
-    
-    else if(key == '-' && key>1)
-        fov--;
-    else if(key == '+' && key<179)
-        fov++;
     
     else if((key == 's') || (key == 'S')) {
         
@@ -829,7 +696,7 @@ void keyboard(unsigned char key, int x, int z)
         at[0] += step*sin(-theta - (PI/2.0))*walkSpeed;
         eye[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
-        moveTight(1, 5);
+        moveTight(-8, 1);
 
     }
     
@@ -870,7 +737,6 @@ void keyboard(unsigned char key, int x, int z)
         exit(0);
     }
     
-    init();
     glutPostRedisplay();
 }
 
@@ -882,60 +748,39 @@ void motion(int x, int y) {
     //makes cursor invisible
     glutSetCursor(GLUT_CURSOR_NONE);
     
+    float changeX = fabsf(oldX-x)/25.0;
+    float changeY = fabsf(oldY-y)/25.0;
+    
     //calculate difference and move camera
     if((oldX - x) < 0) {    //mouse moved to right
-        theta += step/2.0;
+        theta += changeX;
     }
     else if((oldX - x) > 0) {   //mouse moved to left
-        theta -= step/2.0;
+        theta -= changeX;
     }
-    if((oldY - y) < 0) {    //mouse moved up
-        phi -= .01;
+    if((oldY - y) > 0) {    //mouse moved up
+        if(phi - changeY > -PI/4.0)
+            phi -= changeY;
     }
-    else if((oldY - y) > 0) {   //mouse moved down
-        phi += .01;
+    else if((oldY - y) < 0) {   //mouse moved down
+        if(phi + changeY < PI/4.0)
+            phi += changeY;
     }
     
     // Recalculate at values
     at[0] = eye[0] + cos(theta);
     at[1] = eye[1] - sin(phi);
     at[2] = eye[2] + cos(phi)*sin(theta);
-    
-    //move mouse to center of window
-    glutWarpPointer(w/2, h/2);
 
     //save old mouse coords
     oldX = x;
     oldY = y;
-}
-
-/*
- Arrow Key Function
- Controls the at[] vector and directs where the user looks
- */
-void special(int key, int x, int y)
-{
-    switch (key) {
-        case GLUT_KEY_LEFT :
-            theta -= step/2.0;
-            break;
-        case GLUT_KEY_RIGHT :
-            theta += step/2.0;
-            break;
-        case GLUT_KEY_UP :
-            if(phi - (step/2.0) > -PI/4.0)
-                phi -= step/2.0;
-            break;
-        case GLUT_KEY_DOWN :
-            if(phi + (step/2.0) < PI/4.0)
-                phi += step/2.0;
-            break;
+    if(x > w || x < 0.1) {
+        glutWarpPointer(w/2, y);
+        oldX = w/2;
     }
     
-    // Recalculate at values
-    at[0] = eye[0] + cos(theta);
-    at[1] = eye[1] - sin(phi);
-    at[2] = eye[2] + cos(phi)*sin(theta);
+    glutPostRedisplay();
 }
 
 /*
@@ -978,19 +823,15 @@ int main(int argc, char *argv[])
     glutCreateWindow("Final Project");
     
     init();
-    //initHuman(0.344);
-    //initShapes();
     
     glutDisplayFunc(display);
     glutMouseFunc(mouse);
     glutIdleFunc(display);
     glutKeyboardFunc(keyboard);
-    glutSpecialFunc(special);
     glutIdleFunc(idle);
     glutReshapeFunc(reshape);
     glutPassiveMotionFunc(motion);
     glEnable(GL_DEPTH_TEST);
-    
     
     glutMainLoop();
     

@@ -17,6 +17,8 @@
 #include <math.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdbool.h>
+
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -24,24 +26,6 @@
 #include <OpenGL/glut.h>
 #endif
 
-
-
-#define PI 3.1415926535898
-#define Cos(th) cos(PI/180*(th))
-#define Sin(th) sin(PI/180*(th))
-
-float X = -20;
-float delta = 0.4;
-
-
-
-float width = 0;
-float height = 0;
-
-
-double dimension=5.0;
-float a_world [2] = {0, -35};
-float a_head [4] = {0, 0, 0, 0};
 float a_trunk [2] = {0, 0};
 float a_larm [4] = {15, 0, 1, 0};
 float a_rarm [4] = {0, 0, 0, 0};
@@ -51,7 +35,6 @@ float a_lleg [2] = {20, 1};
 float a_rleg [2] = {-20, 1};
 float a_lthigh [2] = {20, 1};
 float a_rthigh [2] = {10, 1};
-
 
 GLubyte v_colors[][3]   = {
     {  0,  0,  0}, /* black  */
@@ -63,9 +46,8 @@ GLubyte v_colors[][3]   = {
     {255,255,255}, /* white  */
     {  0,255,255}};/* cyan   */
 
-
-
-
+// Determines whether or not right arm is swinging forward
+bool right = false;
 
 void drawKnuckle()
 {
@@ -265,7 +247,7 @@ void fullTrunk()
 void drawRobot()
 {
     glPushMatrix();
-//    glTranslated(0.0, 1.0, 0.0);
+
     glRotated(-90.0, 0.0, 0.0, 0.0);
 
     glScalef(0.12, 0.12, 0.12);
@@ -279,34 +261,48 @@ void drawRobot()
 
 void moveTight(int a, int b){
     a_rarm[0] = 0;
-    
     a_rarm[2] = 0;
-    a_lforearm[0] +=a;
-    a_lforearm[1] = b;
 
     a_larm[0] -=a;
     a_larm[2] = b;
     a_larm[0] += a;
     a_larm[2] = b;
     
-    a_lthigh[0] +=a;
     a_lthigh[1] = b;
-    a_rthigh[0] -=a;
     a_rthigh[1] = b;
-    if (a_lforearm[0] > 100 ){
     
+    a_lforearm[1] = b;
+    a_rforearm[1] = b;
+    
+    if(right) {
+        a_lforearm[0] +=a;
+        a_rforearm[0] -= a;
+        
+        a_lthigh[0] += a;
+        a_rthigh[0] -= a;
+    }
+    
+    else {
+        a_lforearm[0] -= a;
+        a_rforearm[0] += a;
+        
+        a_lthigh[0] -= a;
+        a_rthigh[0] += a;
+    }
+    
+    if (a_lforearm[0] > 70 || a_lforearm[0] < -70){
         a_lforearm[0] =20;
         a_lforearm[1] = 1;
-    }
-
-    if (a_lthigh[0] > 100 ){
-        a_lthigh[0] = 20;
+        a_rforearm[0] =20;
+        a_rforearm[1] = 1;
+        
+        a_lthigh[0] = 0;
         a_lthigh[1] = 1;
-        a_rthigh[0] = -20;
+        a_rthigh[0] = 0;
         a_rthigh[1] = 1;
+        
+        right = !right;
     }
-    
-
 }
 
 void throwBall(int a){

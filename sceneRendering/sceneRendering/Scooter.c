@@ -66,6 +66,7 @@ void XCylinder(GLfloat radius,GLfloat length)
     ZCylinder(radius,length);
     glPopMatrix();
 }
+
 void drawTyre()
 {
     int i;
@@ -214,8 +215,6 @@ void gear( GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     glEnd();
     
 }
-
-
 
 // angleSum(a,b) = (a+b) MOD 2*PI
 // a and b are two angles (radians)
@@ -426,7 +425,5 @@ void displayBike(){
     glScalef(0.2, 0.2, 0.2);
     drawFrame();
     glPopMatrix();
-    
-    //glPopMatrix();
 }
 
