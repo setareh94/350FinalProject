@@ -189,7 +189,7 @@ void drawLeg()
 
 void drawLeftLeg()
 {
-    glTranslatef(-1.3, -1.2, 1.0);
+    glTranslatef(-1.3, -1.2, 0.0);
     glPushMatrix();
     
     drawKnuckle();
@@ -210,7 +210,7 @@ void drawLeftLeg()
 
 void drawRightLeg()
 {
-    glTranslatef(0.65, 0.0, 0.0);
+    glTranslatef(0.65, -0.15, 0.0);
     
     glPushMatrix();
     

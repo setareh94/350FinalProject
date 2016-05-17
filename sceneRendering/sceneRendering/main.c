@@ -47,7 +47,7 @@ int bounce_count = 0;
 float ballPos[3]={-10.0f, -10.0f, -10.0f};
 //ball movmement counter (see idle)
 int ball_timer = 100001;
-
+int horizantalAngle = -180;
 float m=0.0;    //movement of clouds
 
 float w = 800, h = 600; // Width and Height of the window
@@ -65,7 +65,8 @@ float roty=0.0;         // for rotating bike
 float transx=0.0, transz=0.0;   // for translating the bike
 
 bool bike = false, extremes = false, hit=false, jump=false, down=false;
-
+bool rotateLeft = false;
+bool rotateRight = false;
 const int BufferSize = 10;
 
 GLuint BufferName[BufferSize];
@@ -477,14 +478,27 @@ void displayPlayerViewport()
     glRotated(90, 0.0, 0.0, 1.0);
     glRotatef(10, 1.0, 0.0, 0.0);
     glTranslatef(0.0, -1.5, 0.53);
-    glRotatef(phi*180.0/PI, 1.0, 0.0, 0.0);
+
+    glRotatef(phi*90/PI, 1.0, 0.0, 0.0);
     glTranslatef(0.0, -sin(phi), -sin(phi));
-    drawRobot();
+
+    if (rotateLeft) {
+        glRotated(90, 0, 0, 1);
+        drawRobot();
+
+    }else if(rotateRight){
+        glRotated(-90, 0, 0, 1);
+        drawRobot();
+    }
+    else{
+        drawRobot();
+    }
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
 }
+
 
 /* Idle function for animations */
 void idle()
@@ -599,6 +613,7 @@ void display(){
         displayPlayerViewport();
         glTranslatef(transx, 0.0, transz);
     }
+    
     // Draw bike
     glTranslatef(-9.0, 0.0, 1.0);
     glRotatef(roty*180/PI, 0.0, 1.0, 0.0);
@@ -687,6 +702,8 @@ void keyboard(unsigned char key, int x, int z)
         eye[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] -= step*cos(-theta - (PI/2.0))*walkSpeed;
         moveTight(8, 1);
+        rotateLeft = false;
+        rotateRight = false;
 
     }
     
@@ -697,6 +714,8 @@ void keyboard(unsigned char key, int x, int z)
         eye[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
         at[2] += step*cos(-theta - (PI/2.0))*walkSpeed;
         moveTight(-8, 1);
+        rotateLeft = false;
+        rotateRight = false;
 
     }
     
@@ -706,6 +725,9 @@ void keyboard(unsigned char key, int x, int z)
         at[0] -= step*sin(-theta)*walkSpeed;
         eye[2] -= step*cos(-theta)*walkSpeed;
         at[2] -= step*cos(-theta)*walkSpeed;
+        moveTight(8, 1);
+        rotateLeft = true;
+        rotateRight = false;
     }
     
     else if((key == 'd') || (key == 'D')) {
@@ -714,6 +736,10 @@ void keyboard(unsigned char key, int x, int z)
         at[0] += step*sin(-theta)*walkSpeed;
         eye[2] += step*cos(-theta)*walkSpeed;
         at[2] += step*cos(-theta)*walkSpeed;
+        moveTight(8, 1);
+        rotateLeft = false;
+        rotateRight = true;
+
     }
 
     else if(key == 32) {
@@ -748,8 +774,8 @@ void motion(int x, int y) {
     //makes cursor invisible
     glutSetCursor(GLUT_CURSOR_NONE);
     
-    float changeX = fabsf(oldX-x)/25.0;
-    float changeY = fabsf(oldY-y)/25.0;
+    float changeX = fabsf(oldX-x)/80;
+    float changeY = fabsf(oldY-y)/80;
     
     //calculate difference and move camera
     if((oldX - x) < 0) {    //mouse moved to right
@@ -759,11 +785,11 @@ void motion(int x, int y) {
         theta -= changeX;
     }
     if((oldY - y) > 0) {    //mouse moved up
-        if(phi - changeY > -PI/4.0)
+        if(phi - changeY > -PI/8.0)
             phi -= changeY;
     }
     else if((oldY - y) < 0) {   //mouse moved down
-        if(phi + changeY < PI/4.0)
+        if(phi + changeY < PI/28)
             phi += changeY;
     }
     

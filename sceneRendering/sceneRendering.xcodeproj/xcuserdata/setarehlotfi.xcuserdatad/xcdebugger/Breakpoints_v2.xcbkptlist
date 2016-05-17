@@ -58,12 +58,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "sceneRendering/main.c"
-            timestampString = "484648321.370945"
+            timestampString = "485156662.094269"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "664"
-            endingLineNumber = "664"
-            landmarkName = "idle()"
+            startingLineNumber = "679"
+            endingLineNumber = "679"
+            landmarkName = "mouse()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -106,12 +106,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "sceneRendering/main.c"
-            timestampString = "484649150.46864"
+            timestampString = "485156662.094269"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "665"
-            endingLineNumber = "665"
-            landmarkName = "idle()"
+            startingLineNumber = "680"
+            endingLineNumber = "680"
+            landmarkName = "mouse()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -128,6 +128,22 @@
             startingLineNumber = "314"
             endingLineNumber = "314"
             landmarkName = "moveTight()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "sceneRendering/main.c"
+            timestampString = "485156100.651777"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "483"
+            endingLineNumber = "483"
+            landmarkName = "displayPlayerViewport()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
