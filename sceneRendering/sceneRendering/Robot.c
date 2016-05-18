@@ -232,9 +232,7 @@ void drawRightLeg()
 
 void fullTrunk()
 {
-    
     glPushMatrix();
-    
     glRotatef(a_trunk[0], a_trunk[1], 0, 0);
     drawTrunk();
     drawLeftArm();
@@ -247,15 +245,9 @@ void fullTrunk()
 void drawRobot()
 {
     glPushMatrix();
-
     glRotated(-90.0, 0.0, 0.0, 0.0);
-
     glScalef(0.12, 0.12, 0.12);
-
     fullTrunk();
-
-    
-    
     glPopMatrix();
 }
 

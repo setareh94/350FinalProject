@@ -472,8 +472,6 @@ void displayPlayerViewport()
     Scene(1);
 
     glPushMatrix();
-    glPopMatrix();
-    glPushMatrix();
     glScaled(3.0,3.0,3.0);
     glRotated(90, 0.0, 0.0, 1.0);
     glRotatef(10, 1.0, 0.0, 0.0);
