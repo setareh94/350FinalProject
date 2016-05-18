@@ -459,11 +459,11 @@ void switchAxisToXYZ()
     glRotated(90,0,1,0);
     glRotated(90,1,0,0);
     glScaled(0.5,0.5,0.5);
+    glTranslatef(0.0, 0.0, -2.4*sin(phi));
 }
 
 void displayPlayerViewport()
 {
-    glPushMatrix();
     glPushMatrix();
     glLoadIdentity();
     switchAxisToXYZ();
@@ -483,15 +483,14 @@ void displayPlayerViewport()
     if (rotateLeft) {
         glRotated(90, 0, 0, 1);
         drawRobot();
-
-    }else if(rotateRight){
+    }
+    else if(rotateRight){
         glRotated(-90, 0, 0, 1);
         drawRobot();
     }
     else{
         drawRobot();
     }
-    glPopMatrix();
     glPopMatrix();
     glPopMatrix();
     glPopMatrix();
@@ -580,7 +579,7 @@ void initShapes()
     initSquare();
 }
 
-void display(){
+void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.6,0.6,1.0,1.0);
     
@@ -783,11 +782,11 @@ void motion(int x, int y) {
         theta -= changeX;
     }
     if((oldY - y) > 0) {    //mouse moved up
-        if(phi - changeY > -PI/8.0)
+        if(phi - changeY > -PI/5.0)
             phi -= changeY;
     }
     else if((oldY - y) < 0) {   //mouse moved down
-        if(phi + changeY < PI/28)
+        if(phi + changeY < PI/5.0)
             phi += changeY;
     }
     
@@ -803,6 +802,10 @@ void motion(int x, int y) {
         glutWarpPointer(w/2, y);
         oldX = w/2;
     }
+    if(y > h || y < 0.1) {
+        glutWarpPointer(x, h/2);
+        oldY = h/2;
+    }
     
     glutPostRedisplay();
 }
@@ -814,6 +817,7 @@ void reshape(int width, int height) {
     //update width and height values
     w = width;
     h = height;
+    
     //Set the viewport
     glViewport(0, 0, w, h);
     

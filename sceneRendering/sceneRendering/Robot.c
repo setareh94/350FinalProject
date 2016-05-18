@@ -64,7 +64,6 @@ void drawKnuckle()
 void drawTrunk()
 {
     glPushMatrix();
-    
     glColor3ubv(v_colors[2]);
     glScalef(1.2, 1.7, 0.5);
     glutSolidCube(1);
@@ -226,7 +225,7 @@ void drawRightLeg()
     glRotatef(a_rthigh[0], a_rthigh[1], 0, 0);
     
     drawLeg();
-    
+
     glPopMatrix();
 }
 
