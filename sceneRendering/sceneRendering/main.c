@@ -2,17 +2,20 @@
  *  Setareh Lotfi
  *  Katie Fotion
  *  Hayden Clevenger
+ *
  *  4/3/2016
  *
  *  This assignment is the culmination of everything we learned this semester
  *
- *  Usage:      The usage will be outlined in detail during the presentation of the project
- *              at turn in. However, one can walk around the scene using W, A, S, D, can jump using 
- *              the return key. Can mount the bike when within a proper distance using the space bar,
- *              can throw a ball using the mouse click and can look around using the mouse.
+ *  Usage:      Walk around scene using w,a,s,d.
+ *              Look around scene using mouse.
+ *              Throw balls with a left mouse click.
+ *              To mount/unmount bicycle move near it and press spacebar.
+ *              To jump press enter.
+ *              To exit use esc.
  *
  *  Overview:   The purpose of this assignment is to demonstrate knowledge in areas like texturing, 
- *              lighting, robot movement, parametric curves (ball throwing) in 3D, and other useful 
+ *              lighting, animation, parametric curves (ball throwing) in 3D, and other useful
  *              OpenGL concepts.
  *
  */
@@ -611,8 +614,11 @@ void display() {
     }
     // Otherwise just translate it to where it was left last and draw person
     else {
-//unfinished person animation
-//        displayPlayerViewport();
+        
+/*unfinished person animation
+ Uncomment to display person
+ */
+ //        displayPlayerViewport();
         glTranslatef(transx, 0.0, transz);
     }
     
