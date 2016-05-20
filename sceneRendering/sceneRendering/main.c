@@ -32,6 +32,7 @@
 #include "Robot.h"
 
 #define PI 3.1415
+#define NUM_BALLS 100
 
 float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
 
@@ -39,15 +40,16 @@ float phi=0.0, theta=3*PI/2.0, step = 0.25;   //for moving camera
 float oldX, oldY;
 
 // Variables for throwing the balls
-float rotation=3*PI/2.0;
-float prev_xz = 0.0;
-float y_start, v0, degree;
-int bounce_count = 0;
+float rotation[NUM_BALLS];
+float prev_xz[NUM_BALLS];
+float y_start[NUM_BALLS], v0[NUM_BALLS], degree[NUM_BALLS];
+int bounce_count[NUM_BALLS];
 //ball posiiton
-float ballPos[3]={-10.0f, -10.0f, -10.0f};
+float ballPos[NUM_BALLS][3];
 //ball movmement counter (see idle)
-int ball_timer = 100001;
-int horizantalAngle = -180;
+int ball_timer[NUM_BALLS];
+int ball_counter = 0;   //keep track of which ball is thrown
+
 float m=0.0;    //movement of clouds
 
 float w = 800, h = 600; // Width and Height of the window
@@ -64,7 +66,7 @@ float walkSpeed = 1.0f; // Speed of walking (gets faster on bike)
 float roty=0.0;         // for rotating bike
 float transx=0.0, transz=0.0;   // for translating the bike
 
-bool bike = false, extremes = false, hit=false, jump=false, down=false;
+bool bike = false, extremes = false, hit[NUM_BALLS], jump=false, down=false;
 bool rotateLeft = false;
 bool rotateRight = false;
 const int BufferSize = 10;
@@ -501,37 +503,39 @@ void displayPlayerViewport()
 void idle()
 {
     //ball things
-    if(ball_timer < 1000000) {
-        
-        if(ballPos[1] < 0.08 && !hit) {
-            ball_timer = 0;
-            y_start = ballPos[1];
+    for(int i = 0; i < NUM_BALLS; i++) {
+        if(ball_timer[i] < 1000000) {
             
-            v0 = 5.0*v0/6.0;
-            prev_xz = 0.0;
-            bounce_count++;
-            hit = true;
-        }
-        if(ballPos[1] > 0.08 && hit)
-            hit = false;
+            if(ballPos[i][1] < 0.08 && !hit[i]) {
+                ball_timer[i] = 0;
+                y_start[i] = ballPos[i][1];
+                
+                v0[i] = 5.0*v0[i]/6.0;
+                prev_xz[i] = 0.0;
+                bounce_count[i]++;
+                hit[i] = true;
+            }
+            if(ballPos[i][1] > 0.08 && hit[i])
+                hit[i] = false;
+                
+            if(bounce_count[i] < 5) {
             
-        if(bounce_count < 5) {
-        
-            float t=ball_timer/100.0;
-        
-            //Math to throw the ball
-            float dist_xz = v0*t*cos(degree);
-            float xz_step = fabs(prev_xz - dist_xz);
-            prev_xz = dist_xz;
-        
-            ballPos[0] -= xz_step*sin(rotation);
-            ballPos[2] -= xz_step*cos(rotation);
-        
-            ballPos[1] = v0*t*sin(degree)-4.9*t*t+y_start;
+                float t = ball_timer[i]/100.0;
+            
+                //Math to throw the ball
+                float dist_xz = v0[i]*t*cos(degree[i]);
+                float xz_step = fabs(prev_xz[i] - dist_xz);
+                prev_xz[i] = dist_xz;
+            
+                ballPos[i][0] -= xz_step*sin(rotation[i]);
+                ballPos[i][2] -= xz_step*cos(rotation[i]);
+            
+                ballPos[i][1] = v0[i]*t*sin(degree[i])-4.9*t*t+y_start[i];
+            }
+            
+            //increment time variable
+            ball_timer[i]++;
         }
-        
-        //increment time variable
-        ball_timer++;
     }
     
     //cloud things
@@ -607,7 +611,8 @@ void display() {
     }
     // Otherwise just translate it to where it was left last and draw person
     else {
-        displayPlayerViewport();
+//unfinished person animation
+//        displayPlayerViewport();
         glTranslatef(transx, 0.0, transz);
     }
     
@@ -619,12 +624,14 @@ void display() {
     glPopMatrix();
     
     // Draw the ball if necessary
-    if(ball_timer < 100000 && ballPos[1] > 0.0) {
-        glPushMatrix();
-        glTranslatef(ballPos[0], ballPos[1], ballPos[2]);
-        glColor3f(1.0, 1.0, 1.0);
-        glutSolidSphere(0.05, 50, 50);
-        glPopMatrix();
+    for(int i = 0; i < NUM_BALLS; i++) {
+        if(ball_timer[i] < 100000 && ballPos[i][1] > 0.0) {
+            glPushMatrix();
+            glTranslatef(ballPos[i][0], ballPos[i][1], ballPos[i][2]);
+            glColor3f(1.0, 1.0, 1.0);
+            glutSolidSphere(0.05, 50, 50);
+            glPopMatrix();
+        }
     }
     
     // Draw 9 houses on the screen
@@ -662,22 +669,25 @@ void mouse(int btn, int state, int x, int y)
 {
     //for ball throwing
     if(btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        ball_timer = 0;
-        ballPos[0] = eye[0];
-        ballPos[1] = eye[1];
-        ballPos[2] = eye[2];
-        rotation = -theta-(PI/2.0);
-        prev_xz = 0.0;
-        bounce_count = 0.0;
-        y_start=0.5;
-        v0 = 6.0;
-        degree = PI/4.0;
-        hit = false;
+        ball_timer[ball_counter] = 0;
+        ballPos[ball_counter][0] = eye[0];
+        ballPos[ball_counter][1] = eye[1];
+        ballPos[ball_counter][2] = eye[2];
+        rotation[ball_counter] = -theta-(PI/2.0);
+        prev_xz[ball_counter] = 0.0;
+        bounce_count[ball_counter] = 0.0;
+        y_start[ball_counter]=0.5;
+        v0[ball_counter] = 6.0;
+        degree[ball_counter] = (PI/6.0 < -phi*2.0) ? -phi*2.0 : PI/29.0;
+        hit[ball_counter] = false;
 
         throwBall(200);
+        
+        ball_counter++;
+        ball_counter = ball_counter % NUM_BALLS;
     }
-    if(btn == GLUT_LEFT_BUTTON && state == GLUT_UP)
-        throwBall(-200);
+   // if(btn == GLUT_LEFT_BUTTON && state == GLUT_UP)
+     //   throwBall(-200);
 }
 
 /* 
