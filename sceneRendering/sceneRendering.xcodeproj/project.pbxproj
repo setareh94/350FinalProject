@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		22232CB01CE32EC6009D845D /* Robot.c in Sources */ = {isa = PBXBuildFile; fileRef = 22232CAE1CE32EC6009D845D /* Robot.c */; };
 		22A685EC1CD5B247000F530E /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A685EB1CD5B247000F530E /* main.c */; };
-		22A685F41CD5B261000F530E /* Player.c in Sources */ = {isa = PBXBuildFile; fileRef = 22A685F21CD5B261000F530E /* Player.c */; };
 		22FBDDDD1CE29F77002928D8 /* Scooter.c in Sources */ = {isa = PBXBuildFile; fileRef = 22FBDDDB1CE29F77002928D8 /* Scooter.c */; };
 		22FBDDE01CE2A030002928D8 /* Lighting.c in Sources */ = {isa = PBXBuildFile; fileRef = 22FBDDDE1CE2A030002928D8 /* Lighting.c */; };
 /* End PBXBuildFile section */
@@ -31,8 +30,6 @@
 		22232CAF1CE32EC6009D845D /* Robot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Robot.h; sourceTree = "<group>"; };
 		22A685E81CD5B247000F530E /* sceneRendering */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sceneRendering; sourceTree = BUILT_PRODUCTS_DIR; };
 		22A685EB1CD5B247000F530E /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		22A685F21CD5B261000F530E /* Player.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Player.c; sourceTree = "<group>"; };
-		22A685F31CD5B261000F530E /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = "<group>"; };
 		22FBDDDB1CE29F77002928D8 /* Scooter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Scooter.c; sourceTree = "<group>"; };
 		22FBDDDC1CE29F77002928D8 /* Scooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scooter.h; sourceTree = "<group>"; };
 		22FBDDDE1CE2A030002928D8 /* Lighting.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Lighting.c; sourceTree = "<group>"; };
@@ -72,8 +69,6 @@
 				22232CAE1CE32EC6009D845D /* Robot.c */,
 				22232CAF1CE32EC6009D845D /* Robot.h */,
 				22A685EB1CD5B247000F530E /* main.c */,
-				22A685F21CD5B261000F530E /* Player.c */,
-				22A685F31CD5B261000F530E /* Player.h */,
 				22FBDDDB1CE29F77002928D8 /* Scooter.c */,
 				22FBDDDC1CE29F77002928D8 /* Scooter.h */,
 				22FBDDDE1CE2A030002928D8 /* Lighting.c */,
@@ -141,7 +136,6 @@
 				22232CB01CE32EC6009D845D /* Robot.c in Sources */,
 				22FBDDDD1CE29F77002928D8 /* Scooter.c in Sources */,
 				22FBDDE01CE2A030002928D8 /* Lighting.c in Sources */,
-				22A685F41CD5B261000F530E /* Player.c in Sources */,
 				22A685EC1CD5B247000F530E /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -618,7 +618,7 @@ void display() {
 /*unfinished person animation
  Uncomment to display person
  */
- //        displayPlayerViewport();
+         displayPlayerViewport();
         glTranslatef(transx, 0.0, transz);
     }
     
@@ -802,7 +802,7 @@ void motion(int x, int y) {
             phi -= changeY;
     }
     else if((oldY - y) < 0) {   //mouse moved down
-        if(phi + changeY < PI/5.0)
+        if(phi + changeY < PI/7.0)
             phi += changeY;
     }
     
